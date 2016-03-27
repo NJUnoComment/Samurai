@@ -49,7 +49,7 @@ public class GameManager {
 		return curBoard;
 	}
 
-	public void nextTurn() {
+	public void nextTurn() throws CloneNotSupportedException {
 		//
 		Info turnInfo = IOManager.input();// 读入回合信息
 		// 一堆处理
