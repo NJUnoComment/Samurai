@@ -10,7 +10,7 @@ package njusoftware.noComment.SamurAI.base;
 
 public class Info {
 	static final int GAME_INFO = 0x1111, TURN_INFO = 0x2222, OUTPUT_INFO = 0x3333; // 这三个常数用来标记信息类型
-	private int kind = GAME_INFO;// 信息类型
+	private int infoType = GAME_INFO;// 信息类型
 
 	/* 以下字段包含回合信息 */
 	private Board primalBorad;// 未处理过的局面信息
@@ -22,7 +22,7 @@ public class Info {
 	/* 以下字段包含游戏信息 */
 	private int totalTurns;// 总回合数
 	private int samuraiID;// 控制的武士ID，由游戏方ID和武器ID合成
-	private int length;// 战斗区域的长
+	private int height;// 战斗区域的长
 	private int width;// 战斗区域的宽
 	private int curePeriod;// 回复时间
 	private int[][] homePos;// 家的位置
@@ -30,18 +30,18 @@ public class Info {
 
 	/* 以下字段包含输出信息 */
 	private int[] actions;// 动作
-	
-	/*以下字段包含标记的getter和setter*/
+
+	/* 以下字段包含标记的getter和setter */
 	public int getKind() {
-		return kind;
+		return infoType;
 	}
 
 	public Info setKind(int kind) {
-		this.kind = kind;
+		this.infoType = kind;
 		return this;
 	}
-	
-    /*以下字段包含回合的getter和setter*/
+
+	/* 以下字段包含回合的getter和setter */
 	public Board getPrimalBorad() {
 		return primalBorad;
 	}
@@ -87,7 +87,7 @@ public class Info {
 		return this;
 	}
 
-	/*以下字段包含游戏的getter和setter*/
+	/* 以下字段包含游戏的getter和setter */
 	public int getTotalTurns() {
 		return totalTurns;
 	}
@@ -101,19 +101,20 @@ public class Info {
 		return samuraiID;
 	}
 
-	public Info setSamuraiID(int gameID,int weaponID) {
-		this.samuraiID = gameID*3+weaponID;
+	public Info setSamuraiID(int samuraiID) {
+		this.samuraiID = samuraiID;
 		return this;
 	}
 
-	public int getLength() {
-		return length;
+	public int getHeight() {
+		return height;
 	}
 
-	public Info setLength(int length) {
-		this.length = length;
+	public Info setHeight(int height) {
+		this.height = height;
 		return this;
 	}
+
 	public int getWidth() {
 		return width;
 	}
@@ -122,7 +123,6 @@ public class Info {
 		this.width = width;
 		return this;
 	}
-
 
 	public int getCurePeriod() {
 		return curePeriod;
@@ -151,7 +151,7 @@ public class Info {
 		return this;
 	}
 
-	/*以下字段包含输出的getter和setter*/
+	/* 以下字段包含输出的getter和setter */
 	public int[] getActions() {
 		return actions;
 	}
@@ -161,8 +161,14 @@ public class Info {
 		return this;
 	}
 
-	// 为了方便调用建议setter全部使用连用形
-	
-	
-}
+	public Info setType(int infoType) {
+		this.infoType = infoType;
+		return this;
+	}
 
+	public int getType() {
+		return infoType;
+	}
+	// 为了方便调用建议setter全部使用连用形
+
+}
