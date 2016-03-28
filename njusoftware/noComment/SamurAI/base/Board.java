@@ -11,13 +11,13 @@ package njusoftware.noComment.SamurAI.base;
 public class Board implements Cloneable {
 	private int[][] battleField;// 此字段包含战斗区域信息
 	private int turn;
-
+	private static final Move[] POSSIBLE_MOVES = Move.values();
 	private int moveIndex = 0;// 用于迭代器的索引
 
 	public boolean hasMoreValidMove() {
-		while (moveIndex < 60) {
+		while (moveIndex < POSSIBLE_MOVES.length) {
 			moveIndex++;
-			if (isVaild(Move.possibleMoves[moveIndex]))
+			if (isVaild(POSSIBLE_MOVES[moveIndex]))
 				return true;
 		}
 		moveIndex = 0;
@@ -26,7 +26,7 @@ public class Board implements Cloneable {
 
 	// 下一个合法操作
 	public Move nextValidMove() {
-		return Move.possibleMoves[moveIndex];
+		return POSSIBLE_MOVES[moveIndex];
 	}
 
 	// 判断是否某个操作是否是合法的
@@ -53,7 +53,6 @@ public class Board implements Cloneable {
 		return nextBoard;
 	}
 
-	// 我会解释为什么要用这个clone方法
 	@Override
 	protected Board clone() throws CloneNotSupportedException {
 		Board nextBoard = (Board) super.clone();
