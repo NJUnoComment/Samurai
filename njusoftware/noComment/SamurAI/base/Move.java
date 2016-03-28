@@ -14,7 +14,6 @@ package njusoftware.noComment.SamurAI.base;
 public enum Move {
 	// 每回合的操作是非常有限的，所以可以用一个数组来把他们全部写出来
 	// 不要觉得蠢，为了效率这是个好办法
-	// 这个类或许可以改成枚举类
 	_MS_OE(new int[] { 0, -1 }, Actions.OCCUPY_EASTWARD, true);
 
 	private int[] moveResult;
