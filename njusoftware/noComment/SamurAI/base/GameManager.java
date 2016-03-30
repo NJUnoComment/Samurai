@@ -8,6 +8,8 @@
  */
 package njusoftware.noComment.SamurAI.base;
 
+import java.io.IOException;
+
 import njusoftware.noComment.SamurAI.AI.AIManager;
 
 public class GameManager {
@@ -62,7 +64,7 @@ public class GameManager {
 
 	public void nextTurn() throws CloneNotSupportedException {
 		//
-		Info turnInfo = IOManager.input();// 读入回合信息
+//		Info turnInfo = IOManager.input();// 读入回合信息
 		// 一堆处理
 		int[] actions = AI.decideActions();
 		Info output = new Info();// 得出最后的行动序列并且封装成Info
@@ -71,7 +73,7 @@ public class GameManager {
 		IOManager.output(output);// 然后输出
 	}
 
-	public static GameManager init() {
+	public static GameManager init() throws IOException {
 		Info gameInfo = IOManager.input();
 		// 可能需要一些操作
 		return new GameManager(gameInfo);

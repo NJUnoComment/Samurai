@@ -18,7 +18,7 @@ public abstract class IOManager {
 	// 输入方法，从标准输入读取并处理字符串，将得到的信息封装成Info进行传递
 	public static Info input() throws IOException {
 		String headLine = bfr.readLine();
-		if (headLine.equals("# Game Info"))
+		if (headLine.contains("Game"))
 			return gameInfoInput();
 		return turnInfoInput();
 	}
@@ -90,10 +90,15 @@ public abstract class IOManager {
 		if (outputInfo.getType() != Info.OUTPUT_INFO)
 			return;
 		int[] actions = outputInfo.getActions();
-		StringBuffer outputStr = new StringBuffer();
+		StringBuilder outputStr = new StringBuilder();
 		for (int i : actions)
 			outputStr.append(i);
 		outputStr.append(0);// 以0结尾
 		System.out.println(outputStr.toString());
+	}
+
+	public static void main(String[] args) throws IOException {
+		Info i = IOManager.input();
+
 	}
 }
