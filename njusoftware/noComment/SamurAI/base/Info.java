@@ -51,13 +51,13 @@ public class Info {
 		return this;
 	}
 
+	public int[][] getBoard() {
+		return board;
+	}
+
 	public Info setBoard(int[][] board) {
 		this.board = board;
 		return this;
-	}
-
-	public int[][] getBoard() {
-		return board;
 	}
 
 	public int[][] getSamuraiState() {

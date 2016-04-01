@@ -18,7 +18,7 @@ public abstract class IOManager {
 	// 输入方法，从标准输入读取并处理字符串，将得到的信息封装成Info进行传递
 	public static Info input() throws IOException {
 		String headLine = bfr.readLine();
-		if (headLine.equals("# Game Info"))
+		if (headLine.contains("Game"))
 			return gameInfoInput();
 		return turnInfoInput();
 	}
@@ -44,10 +44,10 @@ public abstract class IOManager {
 		}
 
 		// 盘面
-		int[][] board = new int[GameManager.height][GameManager.width];
-		for (int i = 0; i < GameManager.height; i++) {
+		int[][] board = new int[GameManager.HEIGHT][GameManager.WIDTH];
+		for (int i = 0; i < GameManager.HEIGHT; i++) {
 			String[] curRow = bfr.readLine().split("\\s+");
-			for (int j = 0; j < GameManager.width; i++)
+			for (int j = 0; j < GameManager.WIDTH; i++)
 				board[i][j] = Integer.parseInt(curRow[j]);
 		}
 		return new Info().setType(Info.TURN_INFO).setTurn(turn).setRemainCurePeriod(remainCurePeriod)
@@ -90,10 +90,15 @@ public abstract class IOManager {
 		if (outputInfo.getType() != Info.OUTPUT_INFO)
 			return;
 		int[] actions = outputInfo.getActions();
-		StringBuffer outputStr = new StringBuffer();
+		StringBuilder outputStr = new StringBuilder();
 		for (int i : actions)
 			outputStr.append(i);
 		outputStr.append(0);// 以0结尾
 		System.out.println(outputStr.toString());
+	}
+
+	public static void main(String[] args) throws IOException {
+		Info i = IOManager.input();
+
 	}
 }
