@@ -4,8 +4,6 @@ import njusoftware.noComment.SamurAI.base.*;
 
 import java.io.IOException;
 
-import njusoftware.noComment.SamurAI.AI.*;
-
 public class Main {
 	public static void main(String[] args) throws CloneNotSupportedException, IOException {
 		// 处理流程是这样的

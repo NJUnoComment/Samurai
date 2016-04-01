@@ -17,12 +17,15 @@ public class GameManager {
 	private Board prevBoard;
 	private Board curBoard;// 这两个字段用于推测视野外情况
 	private int curTurn;// 当前回合数
+	private int remainCurePeriod;
 
-	public static int width;
-	public static int height;
-	public static int totalTurns;// 总回合数
-	public static int[][] homePoses;// 家的位置
-	public static int controlIndex;// 控制的是哪一个武士，0-5表示
+	public static int WIDTH;
+	public static int HEIGHT;
+	public static int TOTAL_TURNS;// 总回合数
+	public static int CURE_PERIOD;
+	public static int[][] HOME_POSES;// 家的位置
+	public static int[][] RANK_AND_SCORE;
+	public static int SAMURAI_ID;// 控制的是哪一个武士，0-5表示
 	public static final Samurai[] SAMURAIS;// 武士
 	public static final int[] ACTION_ORDER = new int[] { 0, 3, 4, 1, 2, 5, 3, 0, 1, 4, 5, 2 }; // 行动的顺序，数字是samurais的下标
 	// 根据回合数来确定那个行动的这么写:
@@ -38,9 +41,14 @@ public class GameManager {
 		SAMURAIS[5] = new Samurai(Weapons.AXE);
 	}
 
-	private GameManager(Info gameInfo) {
-		totalTurns = 0;
-		controlIndex = 0;
+	private GameManager() {
+		prevBoard = new Board();
+		for (int i = 0; i < 6; i++) {
+			// 武士初始位置为家的位置
+			SAMURAIS[i].setPos(HOME_POSES[i]);
+			// 将家的位置加到盘面上
+			prevBoard.set(HOME_POSES[i], i + 1);
+		}
 		AI = new AIManager(this);
 		// 还有一堆
 		System.out.println("0");// 输出0作为回应
@@ -49,8 +57,8 @@ public class GameManager {
 	private void inferMap() {
 		int[][] current = curBoard.getBattleField();
 		int[][] previous = prevBoard.getBattleField();
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
+		for (int i = 0; i < HEIGHT; i++) {
+			for (int j = 0; j < WIDTH; j++) {
 				if (current[i][j] == 9)
 					current[i][j] = previous[i][j];
 			}
@@ -62,21 +70,36 @@ public class GameManager {
 		return 0;
 	}
 
-	public void nextTurn() throws CloneNotSupportedException {
-		//
-//		Info turnInfo = IOManager.input();// 读入回合信息
-		// 一堆处理
-		int[] actions = AI.decideActions();
-		Info output = new Info();// 得出最后的行动序列并且封装成Info
-		// output.setXXX(actions);
-		// output.setType(Info.OUTPUT_INFO);
-		IOManager.output(output);// 然后输出
+	public void nextTurn() throws CloneNotSupportedException, IOException {
+		Info turnInfo = IOManager.input();
+		// 剩余回复回合
+		this.remainCurePeriod = turnInfo.getRemainCurePeriod();
+		// 当前盘面
+		this.curBoard = new Board(turnInfo.getBoard(), curTurn = turnInfo.getTurn());
+		// 武士状态
+		int[][] samuraiState = turnInfo.getSamuraiState();
+		for (int i = 0; i < 6; i++) {
+			if (-1 != samuraiState[i][0])
+				SAMURAIS[i].setPos(new int[] { samuraiState[i][0], samuraiState[i][1] });
+			SAMURAIS[i].setVisible(0 == samuraiState[i][2]);
+			SAMURAIS[i].setActive(-1 == samuraiState[i][2]);
+		}
+
+		// 输出
+		IOManager.output(new Info().setType(Info.OUTPUT_INFO).setActions(AI.decideActions()));// 然后输出
 	}
 
 	public static GameManager init() throws IOException {
 		Info gameInfo = IOManager.input();
 		// 可能需要一些操作
-		return new GameManager(gameInfo);
+		WIDTH = gameInfo.getWidth();
+		HEIGHT = gameInfo.getHeight();
+		TOTAL_TURNS = gameInfo.getTotalTurns();
+		CURE_PERIOD = gameInfo.getCurePeriod();
+		HOME_POSES = gameInfo.getHomePos();
+		SAMURAI_ID = gameInfo.getSamuraiID();
+		RANK_AND_SCORE = gameInfo.getRanksAndScores();
+		return new GameManager();
 	}
 
 	public Board getBoard() {

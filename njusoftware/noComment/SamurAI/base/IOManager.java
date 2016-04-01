@@ -44,10 +44,10 @@ public abstract class IOManager {
 		}
 
 		// ÅÌÃæ
-		int[][] board = new int[GameManager.height][GameManager.width];
-		for (int i = 0; i < GameManager.height; i++) {
+		int[][] board = new int[GameManager.HEIGHT][GameManager.WIDTH];
+		for (int i = 0; i < GameManager.HEIGHT; i++) {
 			String[] curRow = bfr.readLine().split("\\s+");
-			for (int j = 0; j < GameManager.width; i++)
+			for (int j = 0; j < GameManager.WIDTH; i++)
 				board[i][j] = Integer.parseInt(curRow[j]);
 		}
 		return new Info().setType(Info.TURN_INFO).setTurn(turn).setRemainCurePeriod(remainCurePeriod)
