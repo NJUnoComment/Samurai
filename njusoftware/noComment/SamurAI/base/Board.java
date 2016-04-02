@@ -2,8 +2,8 @@
 /**
  * @author clefz created at 2016/3/22
  * 
- *        //请在此处标注编写者姓名 
- *         请在此处填写最终修改时间
+ *        //zqh st
+ *         2016/04/02
  *        此类是局面类
  */
 package njusoftware.noComment.SamurAI.base;
@@ -70,6 +70,28 @@ public class Board implements Cloneable {
 	public Board makeMove(Move move) throws CloneNotSupportedException {
 		Board nextBoard = this.clone();
 		// 一堆操作
+		// 在Board上标记占据的位置
+		int[] samuraiPos = samurais[turn % 12].getPos();
+		int[] finalOccupyPos = new int[2];
+		if (move.getOccupyResult(samurais[turn % 12].getWeapon()) != null) {
+
+			int[][] occupyResult = move.getOccupyResult(samurais[turn % 12].getWeapon());
+			for (int i = 0; i < occupyResult.length; i++) {
+
+				int[] occupied = occupyResult[i];
+				finalOccupyPos[0] = occupied[0] + samuraiPos[0];
+				finalOccupyPos[1] = occupied[1] + samuraiPos[1];
+
+				nextBoard.set(finalOccupyPos, (turn % 12));
+			}
+		}
+		// 修改武士的最终位置
+		int[] moveResult = move.getMoveResult();
+		int[] finalSamuraiPos = new int[2];
+		finalSamuraiPos[0] = moveResult[0] + samuraiPos[0];
+		finalSamuraiPos[1] = moveResult[1] + samuraiPos[1];
+		samurais[turn % 12].setPos(finalSamuraiPos);
+
 		turn++;
 		return nextBoard;
 	}
