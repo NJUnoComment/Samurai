@@ -8,14 +8,13 @@
  */
 package njusoftware.noComment.SamurAI.base;
 
-public class Samurai {
-	private final Weapons weapon;
+public class Samurai implements Cloneable {
+	private Weapons weapon;
 	private int[] pos = new int[2];
-	private int[] homePos = new int[2];
 	private int remainCurePeriod = 0;
 	private boolean isVisible = true;
-	
-	//封装武士的状态
+	private boolean isActive = true;
+	// 封装武士的状态
 
 	public int[] getPos() {
 		return pos;
@@ -23,14 +22,6 @@ public class Samurai {
 
 	public void setPos(int[] pos) {
 		this.pos = pos;
-	}
-
-	public int[] getHomePos() {
-		return homePos;
-	}
-
-	public void setHomePos(int[] homePos) {
-		this.homePos = homePos;
 	}
 
 	public int getRemainCurePeriod() {
@@ -49,6 +40,14 @@ public class Samurai {
 		this.isVisible = isVisible;
 	}
 
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
 	public Weapons getWeapon() {
 		return weapon;
 	}
@@ -57,5 +56,13 @@ public class Samurai {
 		this.weapon = weapon;
 	}
 
-	// 一堆getter和setter
+	@Override
+	public Samurai clone() throws CloneNotSupportedException {
+		Samurai nextSamurai = (Samurai) super.clone();
+		nextSamurai.weapon = this.weapon;
+		System.arraycopy(this.pos, 0, nextSamurai.pos, 0, 2);
+		nextSamurai.remainCurePeriod = this.remainCurePeriod;
+		nextSamurai.isVisible = this.isVisible;
+		return nextSamurai;
+	}
 }
