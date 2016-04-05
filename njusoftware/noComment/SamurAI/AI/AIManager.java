@@ -34,8 +34,8 @@ public class AIManager {
 			return gameManger.evaluate(board);
 		Board nextBoard;
 		int best = -BOUND - 1;
-		while (board.hasMoreValidMove()) {
-			Move nextMove = board.nextValidMove();
+		while (board.hasMoreMove()) {
+			Move nextMove = board.nextMove();
 			if (depth == 1)
 				// curMoveBranch跟踪当前遍历的走法分支
 				curMoveBranch = nextMove;
@@ -59,6 +59,6 @@ public class AIManager {
 	}
 
 	private int[] resolveMove(Move move) {
-		return null;
+		return new int[] { 1, 2, 3, 4, };
 	}
 }
