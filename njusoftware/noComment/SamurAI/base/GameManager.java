@@ -9,6 +9,7 @@
 package njusoftware.noComment.SamurAI.base;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import njusoftware.noComment.SamurAI.AI.AIManager;
 
@@ -19,8 +20,8 @@ public class GameManager {
 	private int curTurn;// 当前回合数
 	private int remainCurePeriod;
 
-	public static int WIDTH;
-	public static int HEIGHT;
+	public static int WIDTH = 15;
+	public static int HEIGHT = 15;
 	public static int TOTAL_TURNS;// 总回合数
 	public static int CURE_PERIOD;
 	public static int[][] HOME_POSES;// 家的位置
@@ -43,14 +44,13 @@ public class GameManager {
 
 	private GameManager() {
 		prevBoard = new Board();
+		AI = new AIManager(this);
 		for (int i = 0; i < 6; i++) {
+			// 将家的位置加到盘面上
+			prevBoard.set(HOME_POSES[i], i);
 			// 武士初始位置为家的位置
 			SAMURAIS[i].setPos(HOME_POSES[i]);
-			// 将家的位置加到盘面上
-			prevBoard.set(HOME_POSES[i], i + 1);
 		}
-		AI = new AIManager(this);
-		// 还有一堆
 		System.out.println("0");// 输出0作为回应
 	}
 
@@ -65,17 +65,24 @@ public class GameManager {
 		}
 	}
 
-	// 评估函数，极其重要，难点
+	// 评估函数
 	public int evaluate(Board board) {
 		return 0;
 	}
 
 	public void nextTurn() throws CloneNotSupportedException, IOException {
 		Info turnInfo = IOManager.input();
+		// 当前回合数
+		curTurn = turnInfo.getTurn();
+
 		// 剩余回复回合
-		this.remainCurePeriod = turnInfo.getRemainCurePeriod();
+		remainCurePeriod = turnInfo.getRemainCurePeriod();
+
 		// 当前盘面
-		this.curBoard = new Board(turnInfo.getBoard(), curTurn = turnInfo.getTurn());
+		prevBoard = curBoard == null ? prevBoard : curBoard;
+		curBoard = new Board(turnInfo.getBoard(), curTurn = turnInfo.getTurn());
+		inferMap();
+
 		// 武士状态
 		int[][] samuraiState = turnInfo.getSamuraiState();
 		for (int i = 0; i < 6; i++) {
@@ -85,8 +92,11 @@ public class GameManager {
 			SAMURAIS[i].setActive(-1 == samuraiState[i][2]);
 		}
 
+		// 受伤时直接输出0
+		if (remainCurePeriod != 0)
+			IOManager.output(new Info().setActions(new int[] { 0 }));
 		// 输出
-		IOManager.output(new Info().setType(Info.OUTPUT_INFO).setActions(AI.decideActions()));// 然后输出
+		IOManager.output(new Info().setActions(AI.decideActions()));// 然后输出
 	}
 
 	public static GameManager init() throws IOException {
@@ -105,4 +115,22 @@ public class GameManager {
 	public Board getBoard() {
 		return curBoard;
 	}
+//
+//	void print() {
+//		int[][] t = curBoard.getBattleField();
+//		for (int[] i : t) {
+//			for (int j : i)
+//				System.out.print((j == 9 ? "x" : j) + " ");
+//			System.out.println();
+//		}
+//	}
+//
+//	public static void print(Board b) {
+//		int[][] t = b.getBattleField();
+//		for (int[] i : t) {
+//			for (int j : i)
+//				System.out.print((j == 9 ? "x" : j) + " ");
+//			System.out.println();
+//		}
+//	}
 }

@@ -2,18 +2,15 @@
 /**
  * @author clefz created at 2016/3/22
  *
- *         //zqh st csy 
- *         edited at 2016/3/27
+ *         //zqh st csy clefz
+ *         edited at 2016/4/5
  *         此类用于封装在IOManager和GameManager之间传递的信息
  */
 package njusoftware.noComment.SamurAI.base;
 
 public class Info {
-	static final int GAME_INFO = 0x1111, TURN_INFO = 0x2222, OUTPUT_INFO = 0x3333; // 这三个常数用来标记信息类型
-	private int infoType = GAME_INFO;// 信息类型
 
 	/* 以下字段包含回合信息 */
-	private Board primalBorad;// 未处理过的局面信息
 	private int[][] board;
 	private int[][] samuraiState;// 武士状态
 	private int remainCurePeriod;// 剩余回复时间
@@ -31,28 +28,21 @@ public class Info {
 	/* 以下字段包含输出信息 */
 	private int[] actions;// 动作
 
-	/* 以下字段包含标记的getter和setter */
-	public int getKind() {
-		return infoType;
-	}
-
-	public Info setKind(int kind) {
-		this.infoType = kind;
-		return this;
-	}
-
 	/* 以下字段包含回合的getter和setter */
-	public Board getPrimalBorad() {
-		return primalBorad;
-	}
-
-	public Info setPrimalBorad(Board primalBorad) {
-		this.primalBorad = primalBorad;
-		return this;
-	}
-
 	public int[][] getBoard() {
 		return board;
+	}
+
+	public int getTurn() {
+		return turn;
+	}
+
+	public int[][] getSamuraiState() {
+		return samuraiState;
+	}
+
+	public int getRemainCurePeriod() {
+		return remainCurePeriod;
 	}
 
 	public Info setBoard(int[][] board) {
@@ -60,26 +50,14 @@ public class Info {
 		return this;
 	}
 
-	public int[][] getSamuraiState() {
-		return samuraiState;
-	}
-
 	public Info setSamuraiState(int[][] samuraiState) {
 		this.samuraiState = samuraiState;
 		return this;
 	}
 
-	public int getRemainCurePeriod() {
-		return remainCurePeriod;
-	}
-
 	public Info setRemainCurePeriod(int remainCurePeriod) {
 		this.remainCurePeriod = remainCurePeriod;
 		return this;
-	}
-
-	public int getTurn() {
-		return turn;
 	}
 
 	public Info setTurn(int turn) {
@@ -92,13 +70,33 @@ public class Info {
 		return totalTurns;
 	}
 
+	public int getSamuraiID() {
+		return samuraiID;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getCurePeriod() {
+		return curePeriod;
+	}
+
+	public int[][] getHomePos() {
+		return homePos;
+	}
+
+	public int[][] getRanksAndScores() {
+		return ranksAndScores;
+	}
+
 	public Info setTotalTurns(int totalTurns) {
 		this.totalTurns = totalTurns;
 		return this;
-	}
-
-	public int getSamuraiID() {
-		return samuraiID;
 	}
 
 	public Info setSamuraiID(int samuraiID) {
@@ -106,17 +104,9 @@ public class Info {
 		return this;
 	}
 
-	public int getHeight() {
-		return height;
-	}
-
 	public Info setHeight(int height) {
 		this.height = height;
 		return this;
-	}
-
-	public int getWidth() {
-		return width;
 	}
 
 	public Info setWidth(int width) {
@@ -124,26 +114,14 @@ public class Info {
 		return this;
 	}
 
-	public int getCurePeriod() {
-		return curePeriod;
-	}
-
 	public Info setCurePeriod(int curePeriod) {
 		this.curePeriod = curePeriod;
 		return this;
 	}
 
-	public int[][] getHomePos() {
-		return homePos;
-	}
-
 	public Info setHomePos(int[][] homePos) {
 		this.homePos = homePos;
 		return this;
-	}
-
-	public int[][] getRanksAndScores() {
-		return ranksAndScores;
 	}
 
 	public Info setRanksAndScores(int[][] ranksAndScores) {
@@ -160,15 +138,5 @@ public class Info {
 		this.actions = actions;
 		return this;
 	}
-
-	public Info setType(int infoType) {
-		this.infoType = infoType;
-		return this;
-	}
-
-	public int getType() {
-		return infoType;
-	}
-	// 为了方便调用建议setter全部使用连用形
 
 }

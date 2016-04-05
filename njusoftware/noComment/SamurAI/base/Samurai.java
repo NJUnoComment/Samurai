@@ -2,8 +2,8 @@
 /**
  * @author clefz created at 2016/3/23
  *
- *         //zqh st 
- *         edited at 2016/3/27
+ *         //zqh st clefz 
+ *         edited at 2016/4/5
  *         封装武士的状态
  */
 package njusoftware.noComment.SamurAI.base;
@@ -16,24 +16,36 @@ public class Samurai implements Cloneable {
 	private boolean isActive = true;
 	// 封装武士的状态
 
-	public int[] getPos() {
-		return pos;
+	public Samurai(Weapons weapon) {
+		this.weapon = weapon;
 	}
 
-	public void setPos(int[] pos) {
-		this.pos = pos;
+	public int[] getPos() {
+		return pos;
 	}
 
 	public int getRemainCurePeriod() {
 		return remainCurePeriod;
 	}
 
-	public void setRemainCurePeriod(int remainCurePeriod) {
-		this.remainCurePeriod = remainCurePeriod;
+	public Weapons getWeapon() {
+		return weapon;
 	}
 
 	public boolean isVisible() {
 		return isVisible;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setPos(int[] pos) {
+		this.pos = pos;
+	}
+
+	public void setRemainCurePeriod(int remainCurePeriod) {
+		this.remainCurePeriod = remainCurePeriod;
 	}
 
 	public void setVisible(boolean isVisible) {
@@ -44,25 +56,21 @@ public class Samurai implements Cloneable {
 		this.isActive = isActive;
 	}
 
-	public boolean isActive() {
-		return isActive;
-	}
-
-	public Weapons getWeapon() {
-		return weapon;
-	}
-
-	public Samurai(Weapons weapon) {
-		this.weapon = weapon;
+	public void move(int[] moveTo) {
+		pos[0] += moveTo[1];
+		pos[1] += moveTo[0];
 	}
 
 	@Override
 	public Samurai clone() throws CloneNotSupportedException {
 		Samurai nextSamurai = (Samurai) super.clone();
 		nextSamurai.weapon = this.weapon;
-		System.arraycopy(this.pos, 0, nextSamurai.pos, 0, 2);
+		int[] nextPos = new int[2];
+		System.arraycopy(this.pos, 0, nextPos, 0, 2);
+		nextSamurai.pos = nextPos;
 		nextSamurai.remainCurePeriod = this.remainCurePeriod;
 		nextSamurai.isVisible = this.isVisible;
+		nextSamurai.isActive = this.isActive;
 		return nextSamurai;
 	}
 }

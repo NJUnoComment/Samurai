@@ -118,16 +118,4 @@ public enum Move {
 		}
 		return occupyResult;
 	}
-
-//	public static void main(String[] args) {
-//		Weapons w = Weapons.SWORD;
-//		Move[] moves = Move.values();
-//		long s = System.nanoTime();
-//		for (Move m : moves) {
-//			 int[] moveResult = m.getMoveResult();
-//			int[][] occupyResult = m.getOccupyResult(w);
-//		}
-//		long e = System.nanoTime();
-//		System.out.println(e - s);
-//	}
 }
