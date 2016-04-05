@@ -20,6 +20,11 @@ public class Samurai implements Cloneable {
 		return pos;
 	}
 
+	public void move(int[] moveResult) {
+		pos[0] += moveResult[0];
+		pos[1] += moveResult[1];
+	}
+
 	public void setPos(int[] pos) {
 		this.pos = pos;
 	}
