@@ -4,6 +4,8 @@
  * 
  *        //zqh st
  *         2016/04/02
+ *        //zqh
+ *         2016/04/06
  *        此类是局面类
  */
 package njusoftware.noComment.SamurAI.base;
@@ -76,9 +78,13 @@ public class Board implements Cloneable {
 		int[][] occupyResult = move.getOccupyResult(samurais[actionSamuraiID].getWeapon());
 		if (occupyResult != null) {
 			for (int[] occupied : occupyResult) {
-				finalOccupyPos[0] = occupied[0] + samuraiPos[0];
-				finalOccupyPos[1] = occupied[1] + samuraiPos[1];
-				nextBoard.set(finalOccupyPos, actionSamuraiID);
+				if (occupied.equals(GameManager.HOME_POSES)) {
+					continue;
+				} else {
+					finalOccupyPos[0] = occupied[0] + samuraiPos[0];
+					finalOccupyPos[1] = occupied[1] + samuraiPos[1];
+					nextBoard.set(finalOccupyPos, actionSamuraiID);
+				}
 			}
 		}
 		// 修改武士的最终位置
