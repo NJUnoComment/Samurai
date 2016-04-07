@@ -4,6 +4,8 @@
  *
  *         clefz
  *         2016/3/20
+ *         zqh
+ *         2016/4/7
  *         枚举行动类型，封装了旋转范围的方法
  */
 package njusoftware.noComment.SamurAI.base;
@@ -66,4 +68,23 @@ public enum Actions {
 			tmp[0] = tmp[0] ^ tmp[1];
 		}
 	}
+	
+//	public static void main(String[] args){
+//		Actions ac=Actions.OCCUPY_EASTWARD;
+//		Weapons w=Weapons.AXE;
+//		
+//			long s=System.nanoTime();
+//		
+//			int[][] teste=ac.getAttackRange(w);
+//			long e=System.nanoTime();
+//			System.out.println(e-s);
+		
+//		int[][] testf=ac.getMoveRange();
+//		long f=System.nanoTime();
+	
+//		System.out.println(e-s);
+//	}
+
+	//Time :getAttackRange()平均用时22208.98毫微秒（测试50次）
+	//Time :getMoveRange() 用时平均19832.6毫微秒（测试50次）
 }
