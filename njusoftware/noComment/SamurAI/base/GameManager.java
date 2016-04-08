@@ -2,14 +2,15 @@
 /**
  * @author clefz created at 2016/3/23
  * 
- *         //请在此处标注编写者姓名 
- *         请在此处填写最终修改时间
+ *         //clefz
+ *         2016/4/8
  *         此类用于管理整个局面，对Board进行操作，并且以类迭代器的形式给出下一步可能的合法操作
  */
 package njusoftware.noComment.SamurAI.base;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
 
 import njusoftware.noComment.SamurAI.AI.AIManager;
 
@@ -27,11 +28,8 @@ public class GameManager {
 	public static int[][] HOME_POSES;// 家的位置
 	public static int[][] RANK_AND_SCORE;
 	public static int SAMURAI_ID;// 控制的是哪一个武士，0-5表示
-	public static final Samurai[] SAMURAIS;// 武士
 	public static final int[] ACTION_ORDER = new int[] { 0, 3, 4, 1, 2, 5, 3, 0, 1, 4, 5, 2 }; // 行动的顺序，数字是samurais的下标
-	// 根据回合数来确定那个行动的这么写:
-	// samurais[ACTION_ORDER[turn%12]]
-
+	public static final Samurai[] SAMURAIS;// 武士
 	static {
 		SAMURAIS = new Samurai[6];
 		SAMURAIS[0] = new Samurai(Weapons.SPEAR);
@@ -54,6 +52,7 @@ public class GameManager {
 		System.out.println("0");// 输出0作为回应
 	}
 
+	// 通过推测去除视野限制
 	private void inferMap() {
 		int[][] current = curBoard.getBattleField();
 		int[][] previous = prevBoard.getBattleField();
@@ -67,13 +66,21 @@ public class GameManager {
 
 	// 评估函数
 	public int evaluate(Board board) {
-		return 0;
+		return Math.abs(countGrid());
+	}
+
+	// 占领面积差
+	public int countGrid() {
+		int[][] battleField = curBoard.getBattleField();
+		int result = 0;
+		for (int[] row : battleField)
+			for (int grid : row)
+				result += (grid < 3 ? 1 : (grid != 8 ? -1 : 0));
+		return result;
 	}
 
 	public void nextTurn() throws CloneNotSupportedException, IOException {
 		Info turnInfo = IOManager.input();
-		// 当前回合数
-		curTurn = turnInfo.getTurn();
 
 		// 剩余回复回合
 		remainCurePeriod = turnInfo.getRemainCurePeriod();
@@ -95,6 +102,7 @@ public class GameManager {
 		// 受伤时直接输出0
 		if (remainCurePeriod != 0)
 			IOManager.output(new Info().setActions(new int[] { 0 }));
+
 		// 输出
 		IOManager.output(new Info().setActions(AI.decideActions()));// 然后输出
 	}
@@ -115,22 +123,40 @@ public class GameManager {
 	public Board getBoard() {
 		return curBoard;
 	}
-//
-//	void print() {
-//		int[][] t = curBoard.getBattleField();
-//		for (int[] i : t) {
-//			for (int j : i)
-//				System.out.print((j == 9 ? "x" : j) + " ");
-//			System.out.println();
-//		}
-//	}
-//
-//	public static void print(Board b) {
-//		int[][] t = b.getBattleField();
-//		for (int[] i : t) {
-//			for (int j : i)
-//				System.out.print((j == 9 ? "x" : j) + " ");
-//			System.out.println();
-//		}
-//	}
+
+	 void print() {
+	 int[][] t = curBoard.getBattleField();
+	 for (int[] i : t) {
+	 for (int j : i)
+	 System.out.print((j == 9 ? "x" : j) + " ");
+	 System.out.println();
+	 }
+	 }
+	//
+	// public static void print(Board b) {
+	// int[][] t = b.getBattleField();
+	// for (int[] i : t) {
+	// for (int j : i)
+	// System.out.print((j == 9 ? "x" : j) + " ");
+	// System.out.println();
+	// }
+	// }
+
+	public static void main(String[] args) throws IOException, CloneNotSupportedException {
+		Move[] moves = Move.values();
+		GameManager gm = GameManager.init();
+		gm.nextTurn();
+		System.out.println(gm.evaluate(gm.curBoard));
+		gm.print();
+		// int[] p = gm.curBoard.makeMove(moves[0]).samurais[0].getPos();
+		// System.out.println(p[0] +","+ p[1]);
+		// long s = System.nanoTime();
+		// for (Move m : moves) {
+		// // System.out.println(m.name());
+		// gm.curBoard.makeMove(m);
+		// // System.out.println();
+		// }
+		// long e = System.nanoTime();
+		// System.out.println(e - s);
+	}
 }

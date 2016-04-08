@@ -25,9 +25,6 @@ public enum Weapons {
 		int[][] newArray = new int[length][];
 		for (int i = 0; i < length; i++)
 			newArray[i] = attackRange[i].clone();
-		// 请不要主动调用这个方法
-		// 获取攻击范围以如下方式
-		// int[][] attackRange = [Actions的实例].getAttackRange([Weapon的实例]);
 		return newArray;
 	}
 }

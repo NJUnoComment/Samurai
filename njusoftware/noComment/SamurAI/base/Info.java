@@ -28,7 +28,6 @@ public class Info {
 	/* 以下字段包含输出信息 */
 	private int[] actions;// 动作
 
-	/* 以下字段包含回合的getter和setter */
 	public int[][] getBoard() {
 		return board;
 	}
@@ -65,7 +64,6 @@ public class Info {
 		return this;
 	}
 
-	/* 以下字段包含游戏的getter和setter */
 	public int getTotalTurns() {
 		return totalTurns;
 	}
@@ -129,7 +127,6 @@ public class Info {
 		return this;
 	}
 
-	/* 以下字段包含输出的getter和setter */
 	public int[] getActions() {
 		return actions;
 	}

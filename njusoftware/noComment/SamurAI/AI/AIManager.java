@@ -3,7 +3,7 @@
  * @author clefz created at 2016/3/23
  *
  *         clefz 
- *         2016/3/27 23:17
+ *         2016/4/8
  *         核心AI类，封装AlphaBeta算法
  */
 package njusoftware.noComment.SamurAI.AI;

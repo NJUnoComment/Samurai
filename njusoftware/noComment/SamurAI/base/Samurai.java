@@ -3,21 +3,21 @@
  * @author clefz created at 2016/3/23
  *
  *         //zqh st clefz 
- *         edited at 2016/4/5
+ *         edited at 2016/4/8
  *         封装武士的状态
  */
 package njusoftware.noComment.SamurAI.base;
 
 public class Samurai implements Cloneable {
 	private Weapons weapon;
-	private int[] pos = new int[2];
+	private int[] pos;
 	private int remainCurePeriod = 0;
 	private boolean isVisible = true;
 	private boolean isActive = true;
-	// 封装武士的状态
 
 	public Samurai(Weapons weapon) {
 		this.weapon = weapon;
+		this.pos = new int[2];
 	}
 
 	public int[] getPos() {

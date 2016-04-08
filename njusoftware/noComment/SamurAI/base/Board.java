@@ -2,13 +2,12 @@
 /**
  * @author clefz created at 2016/3/22
  * 
- *        //zqh st
- *         2016/04/02
- *        此类是局面类
+ *        //zqh st clefz
+ *         2016/4/8
+ *        局面类
  */
 package njusoftware.noComment.SamurAI.base;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 public class Board implements Cloneable {
@@ -35,14 +34,11 @@ public class Board implements Cloneable {
 	// 走棋
 	public Board makeMove(Move move) throws CloneNotSupportedException {
 		Board nextBoard = this.clone();
-		
+
 		int activeSamuraiID = GameManager.ACTION_ORDER[turn % 12];// 取得进行活动的武士的ID
 		Samurai activeSamurai = nextBoard.samurais[activeSamuraiID];// 取得进行活动的武士
 		int[] samuraiPos = activeSamurai.getPos();// 取得武士位置
 		nextBoard.turn++;// 回合数增加
-
-		// 武士位置变化
-		activeSamurai.move(move.getMoveResult());
 
 		// 占据区域变化
 		int[][] occupyResult = move.getOccupyResult(activeSamurai.getWeapon());
@@ -52,6 +48,9 @@ public class Board implements Cloneable {
 
 		for (int[] occupied : occupyResult)
 			nextBoard.set(new int[] { occupied[1] + samuraiPos[0], occupied[0] + samuraiPos[1] }, activeSamuraiID);
+
+		// 武士位置变化
+		activeSamurai.move(move.getMoveResult());
 
 		return nextBoard;
 	}
@@ -78,7 +77,7 @@ public class Board implements Cloneable {
 		return turn >= GameManager.TOTAL_TURNS;
 	}
 
-	// 判断是否某个操作是否是合法的
+	// 判断某个操作是否是合法的
 	private boolean isVaild(Move move) {
 		return false;
 	}
@@ -88,6 +87,12 @@ public class Board implements Cloneable {
 	}
 
 	public void set(int[] pos, int val) {
+		if (pos[0] < 0 || pos[1] < 0 || pos[0] >= GameManager.HEIGHT || pos[1] >= GameManager.WIDTH)
+			return;
+		for (int i = 0; i < 6; i++)
+			if (GameManager.HOME_POSES[i][0] == pos[0])
+				if (GameManager.HOME_POSES[i][1] == pos[1])
+					return;
 		battleField[pos[0]][pos[1]] = val;
 	}
 
@@ -114,10 +119,20 @@ public class Board implements Cloneable {
 		for (int i = 0; i < 6; i++)
 			nextSamurais[i] = this.samurais[i].clone();
 		nextBoard.samurais = nextSamurais;
-		
+
 		// 指针归零
 		nextBoard.moveIndex = 0;
 
 		return nextBoard;
 	}
+
+//	public void print() {
+//		//测试用
+//		System.out.println();
+//		for (int[] t : battleField) {
+//			for (int i : t)
+//				System.out.print(i + " ");
+//			System.out.println();
+//		}
+//	}
 }
