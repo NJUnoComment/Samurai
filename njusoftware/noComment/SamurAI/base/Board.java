@@ -79,11 +79,26 @@ public class Board implements Cloneable {
 
 	// 判断某个操作是否是合法的
 	private boolean isVaild(Move move) {
-		return false;
+		int[] curPos = this.getCurrentSamurai().getPos();
+		int[] offset = move.getMoveResult();
+		return curPos[0] + offset[0] <= GameManager.WIDTH && curPos[0] + offset[0] >= 0
+				&& curPos[1] + offset[1] <= GameManager.HEIGHT && curPos[1] + offset[1] >= 0;
 	}
 
 	public int[][] getBattleField() {
 		return this.battleField;
+	}
+
+	public Samurai getCurrentSamurai() {
+		return this.samurais[GameManager.ACTION_ORDER[turn % 12]];
+	}
+
+	public boolean isFriendArea(int x, int y) {
+		return battleField[y][x] / 3 == GameManager.SAMURAI_ID / 3;
+	}
+
+	public boolean isFriendArea(int[] pos) {
+		return isFriendArea(pos[0], pos[1]);
 	}
 
 	public void set(int[] pos, int val) {
@@ -126,13 +141,13 @@ public class Board implements Cloneable {
 		return nextBoard;
 	}
 
-//	public void print() {
-//		//测试用
-//		System.out.println();
-//		for (int[] t : battleField) {
-//			for (int i : t)
-//				System.out.print(i + " ");
-//			System.out.println();
-//		}
-//	}
+	// public void print() {
+	// //测试用
+	// System.out.println();
+	// for (int[] t : battleField) {
+	// for (int i : t)
+	// System.out.print(i + " ");
+	// System.out.println();
+	// }
+	// }
 }
