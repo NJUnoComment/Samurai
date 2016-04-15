@@ -43,29 +43,26 @@ public class AIManager {
 		if (depth == 0 || board.isEnd())
 			return gameManger.evaluate(board);
 		Board nextBoard;
-		int best = -BOUND - 1;
 		while (board.hasMoreMove()) {
 			Move nextMove = board.nextMove();
-			if (depth == 1)
+			if (depth == MAX_DEPTH)
 				// curMoveBranch跟踪当前遍历的走法分支
 				curMoveBranch = nextMove;
-			if (bestMove.equals(null))
+			if (bestMove == null)
 				// bestMove的初始值是最左侧的走法分支
-				bestMove = nextMove;
+				bestMove = curMoveBranch;
 			nextBoard = board.makeMove(nextMove);
 			int value = -alphaBetaPruning(nextBoard, depth - 1, -beta, -alpha);// 迭代
-			if (value > best)
-				best = value;
-			if (best > alpha) {
+			if (value >= beta)
+				return value;
+			if (value > alpha) {
 				// 更新alpha,同时更新bestMove
-				alpha = best;
-				if (!bestMove.equals(curMoveBranch))
+				alpha = value;
+				if (!bestMove.equals(curMoveBranch) && curMoveBranch != null)
 					bestMove = curMoveBranch;
 			}
-			if (best >= beta)
-				break;// 剪枝
 		}
-		return best;
+		return alpha;
 	}
 
 	/* 解析Move */
@@ -211,7 +208,7 @@ public class AIManager {
 		String[] tmp = bestMove.name().split("_");
 		int[] result = new int[tmp.length];
 		for (int i = 0; i < tmp.length; i++)
-			result[i] = ACTION_INDEX.indexOf(tmp[i]);
+			result[i] = ACTION_INDEX.indexOf(tmp[i]) + 1;
 		return result;
 	}
 

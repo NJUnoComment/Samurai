@@ -57,12 +57,12 @@ public class Board implements Cloneable {
 
 	// 是否有更多合法操作
 	public boolean hasMoreMove() {
-		if (samurais[GameManager.ACTION_ORDER[turn % 12]].isActive() == false)
+		if (!samurais[GameManager.ACTION_ORDER[turn % 12]].isActive())
 			return false;
-		while (moveIndex < POSSIBLE_MOVES.length) {
-			moveIndex++;
+		while (moveIndex < 60) {
 			if (isVaild(POSSIBLE_MOVES[moveIndex]))
 				return true;
+			moveIndex++;
 		}
 		moveIndex = 0;
 		return false;
@@ -70,7 +70,9 @@ public class Board implements Cloneable {
 
 	// 下一个合法操作
 	public Move nextMove() {
-		return POSSIBLE_MOVES[moveIndex];
+		Move move = POSSIBLE_MOVES[moveIndex];
+		moveIndex++;
+		return move;
 	}
 
 	public boolean isEnd() {
@@ -81,8 +83,8 @@ public class Board implements Cloneable {
 	private boolean isVaild(Move move) {
 		int[] curPos = this.getCurrentSamurai().getPos();
 		int[] offset = move.getMoveResult();
-		return curPos[0] + offset[0] <= GameManager.WIDTH && curPos[0] + offset[0] >= 0
-				&& curPos[1] + offset[1] <= GameManager.HEIGHT && curPos[1] + offset[1] >= 0;
+		return curPos[0] + offset[0] < GameManager.WIDTH && curPos[0] + offset[0] >= 0
+				&& curPos[1] + offset[1] < GameManager.HEIGHT && curPos[1] + offset[1] >= 0;
 	}
 
 	public int[][] getBattleField() {

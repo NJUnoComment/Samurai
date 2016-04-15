@@ -16,9 +16,9 @@ public abstract class IOManager {
 	private static BufferedReader bfr = new BufferedReader(new InputStreamReader(System.in));
 
 	// 输入
-	public static Info input() throws IOException {
-		String headLine = bfr.readLine();
-		if (headLine.contains("Game"))
+	public static Info input(boolean needGameInfo) throws IOException {
+		bfr.readLine();
+		if (needGameInfo)
 			return gameInfoInput();
 		return turnInfoInput();
 	}
@@ -27,18 +27,19 @@ public abstract class IOManager {
 	private static Info turnInfoInput() throws IOException {
 		// 回合数
 		bfr.readLine();
-		int turn = Integer.parseInt(bfr.readLine().split("\\s+")[0]);
+		int turn = Integer.parseInt(bfr.readLine().split("\\s")[0]);
 
 		// 剩余回复时间
 		bfr.readLine();
-		int remainCurePeriod = Integer.parseInt(bfr.readLine().split("\\s+")[0]);
+		int remainCurePeriod = Integer.parseInt(bfr.readLine().split("\\s")[0]);
 
 		// 武士状态
-		int[][] samuraiStates = new int[6][3];
 		bfr.readLine();
+		int[][] samuraiStates = new int[6][3];
 		String tmp = bfr.readLine();
+		String[] samuraiState;
 		for (int i = 0; i < 6; tmp = bfr.readLine(), i++) {
-			String[] samuraiState = tmp.split("\\s+");
+			samuraiState = tmp.split("\\s");
 			samuraiStates[i][0] = Integer.parseInt(samuraiState[0]);
 			samuraiStates[i][1] = Integer.parseInt(samuraiState[1]);
 			samuraiStates[i][2] = Integer.parseInt(samuraiState[2]);
@@ -46,10 +47,12 @@ public abstract class IOManager {
 
 		// 盘面
 		int[][] board = new int[GameManager.HEIGHT][GameManager.WIDTH];
-		for (int i = 0; i < GameManager.HEIGHT; i++) {
-			String[] curRow = bfr.readLine().split("\\s+");
-			for (int j = 0; j < GameManager.WIDTH; j++)
-				board[i][j] = Integer.parseInt(curRow[j]);
+		// bfr.readLine();
+		String[] curRow;
+		for (int i = 0; i < GameManager.HEIGHT; ++i) {
+			curRow = bfr.readLine().split("\\s");
+			for (int j = 0; j < GameManager.WIDTH; ++j)
+				board[i][j] = Integer.parseInt(curRow[j + 1]);
 		}
 		return new Info().setTurn(turn).setRemainCurePeriod(remainCurePeriod).setSamuraiState(samuraiStates)
 				.setBoard(board);
@@ -91,7 +94,7 @@ public abstract class IOManager {
 		int[] actions = outputInfo.getActions();
 		StringBuilder outputStr = new StringBuilder();
 		for (int i : actions)
-			outputStr.append(i + " ");
+			outputStr.append(i).append(" ");
 		outputStr.append(0);// 以0结尾
 		System.out.println(outputStr.toString());
 	}
