@@ -44,6 +44,11 @@ public class Samurai implements Cloneable {
 		this.pos = pos;
 	}
 
+	public void setPos(int x, int y) {
+		pos[0] = x;
+		pos[1] = y;
+	}
+
 	public void setRemainCurePeriod(int remainCurePeriod) {
 		this.remainCurePeriod = remainCurePeriod;
 	}
@@ -57,8 +62,8 @@ public class Samurai implements Cloneable {
 	}
 
 	public void move(int[] moveTo) {
-		pos[0] += moveTo[1];
-		pos[1] += moveTo[0];
+		pos[0] += moveTo[0];
+		pos[1] += moveTo[1];
 	}
 
 	@Override

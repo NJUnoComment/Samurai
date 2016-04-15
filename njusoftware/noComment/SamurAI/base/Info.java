@@ -28,7 +28,7 @@ public class Info {
 	/* 以下字段包含输出信息 */
 	private int[] actions;// 动作
 
-	public int[][] getBoard() {
+	public int[][] getBattleField() {
 		return board;
 	}
 
@@ -44,7 +44,7 @@ public class Info {
 		return remainCurePeriod;
 	}
 
-	public Info setBoard(int[][] board) {
+	public Info setBattleField(int[][] board) {
 		this.board = board;
 		return this;
 	}

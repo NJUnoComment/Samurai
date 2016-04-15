@@ -32,7 +32,7 @@ public class Board implements Cloneable {
 	}
 
 	// 走棋
-	public Board makeMove(Move move) throws CloneNotSupportedException {
+	final public Board makeMove(Move move) throws CloneNotSupportedException {
 		Board nextBoard = this.clone();
 
 		int activeSamuraiID = GameManager.ACTION_ORDER[turn % 12];// 取得进行活动的武士的ID
@@ -41,13 +41,11 @@ public class Board implements Cloneable {
 		nextBoard.turn++;// 回合数增加
 
 		// 占据区域变化
-		int[][] occupyResult = move.getOccupyResult(activeSamurai.getWeapon());
+		int[][] occupyResult;
 
-		if (occupyResult == null)
-			return nextBoard;
-
-		for (int[] occupied : occupyResult)
-			nextBoard.set(new int[] { occupied[1] + samuraiPos[0], occupied[0] + samuraiPos[1] }, activeSamuraiID);
+		if ((occupyResult = move.getOccupyResult(activeSamurai.getWeapon())) != null)
+			for (int[] occupied : occupyResult)
+				nextBoard.set(occupied[0] + samuraiPos[0], occupied[1] + samuraiPos[1], activeSamuraiID);
 
 		// 武士位置变化
 		activeSamurai.move(move.getMoveResult());
@@ -56,8 +54,8 @@ public class Board implements Cloneable {
 	}
 
 	// 是否有更多合法操作
-	public boolean hasMoreMove() {
-		if (!samurais[GameManager.ACTION_ORDER[turn % 12]].isActive())
+	final public boolean hasMoreMove() {
+		if (!getCurrentSamurai().isActive())
 			return false;
 		while (moveIndex < 60) {
 			if (isVaild(POSSIBLE_MOVES[moveIndex]))
@@ -69,18 +67,18 @@ public class Board implements Cloneable {
 	}
 
 	// 下一个合法操作
-	public Move nextMove() {
+	final public Move nextMove() {
 		Move move = POSSIBLE_MOVES[moveIndex];
 		moveIndex++;
 		return move;
 	}
 
-	public boolean isEnd() {
+	final public boolean isEnd() {
 		return turn >= GameManager.TOTAL_TURNS;
 	}
 
 	// 判断某个操作是否是合法的
-	private boolean isVaild(Move move) {
+	final private boolean isVaild(Move move) {
 		int[] curPos = this.getCurrentSamurai().getPos();
 		int[] offset = move.getMoveResult();
 		return curPos[0] + offset[0] < GameManager.WIDTH && curPos[0] + offset[0] >= 0
@@ -96,7 +94,7 @@ public class Board implements Cloneable {
 	}
 
 	public boolean isFriendArea(int x, int y) {
-		return battleField[y][x] / 3 == GameManager.SAMURAI_ID / 3;
+		return !(battleField[y][x] == 8) && !(battleField[y][x] < 3 ^ GameManager.SAMURAI_ID < 3);
 	}
 
 	public boolean isFriendArea(int[] pos) {
@@ -104,13 +102,16 @@ public class Board implements Cloneable {
 	}
 
 	public void set(int[] pos, int val) {
-		if (pos[0] < 0 || pos[1] < 0 || pos[0] >= GameManager.HEIGHT || pos[1] >= GameManager.WIDTH)
+		this.set(pos[0], pos[1], val);
+	}
+
+	public void set(int x, int y, int val) {
+		if (x < 0 || y < 0 || x >= GameManager.WIDTH || y >= GameManager.HEIGHT)
 			return;
-		for (int i = 0; i < 6; i++)
-			if (GameManager.HOME_POSES[i][0] == pos[0])
-				if (GameManager.HOME_POSES[i][1] == pos[1])
-					return;
-		battleField[pos[0]][pos[1]] = val;
+		for (int i = 0; i < 6; ++i)
+			if (GameManager.HOME_POSES[i][0] == x && GameManager.HOME_POSES[i][1] == y)
+				return;
+		this.battleField[y][x] = val;
 	}
 
 	public void setBattleField(final int[][] theBattleField) {
@@ -125,7 +126,7 @@ public class Board implements Cloneable {
 
 		// 克隆局面信息
 		int[][] nextBattleField = new int[GameManager.HEIGHT][];
-		for (int i = 0; i < GameManager.HEIGHT; i++) {
+		for (int i = 0; i < GameManager.HEIGHT; ++i) {
 			nextBattleField[i] = new int[width];
 			System.arraycopy(this.battleField[i], 0, nextBattleField[i], 0, width);
 		}
@@ -133,7 +134,7 @@ public class Board implements Cloneable {
 
 		// 克隆武士
 		Samurai[] nextSamurais = new Samurai[6];
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 6; ++i)
 			nextSamurais[i] = this.samurais[i].clone();
 		nextBoard.samurais = nextSamurais;
 
@@ -143,13 +144,4 @@ public class Board implements Cloneable {
 		return nextBoard;
 	}
 
-	// public void print() {
-	// //测试用
-	// System.out.println();
-	// for (int[] t : battleField) {
-	// for (int i : t)
-	// System.out.print(i + " ");
-	// System.out.println();
-	// }
-	// }
 }
