@@ -21,7 +21,7 @@ public class GameManager {
 	private int curTurn;// 当前回合数
 	private int remainCurePeriod;
 
-	private static int count = 0;
+//	private static int count = 0;
 
 	public static int WIDTH;
 	public static int HEIGHT;
@@ -200,16 +200,20 @@ public class GameManager {
 		int result = 0;
 		for (int[] row : battleField)
 			for (int grid : row)
-				result += grid == 8 ? 0 : (!((grid > 2) ^ tmp == 3) ? 1 : -1);
+				result += grid == 8 ? 0 : (!(grid > 2 ^ tmp == 3) ? 1 : -1);
 		return result;
 	}
 
 	/* 评估函数 */
 	final public int evaluate(Board board) {
-//		count++;
-//		System.out.println(count);
+		// count++;
+		// System.out.println(count);
 		// 评估函数将永远从我方视角来评估
-		return diffCapture(board);
+		// 由于游戏不是双方按每一回合交错进行的，
+		// 所以如果上一回合是友方回合，则要将评估值加上负号
+		// 来抵消剪枝算法中的负号
+		// 所有偶数回合不换边，即偶数回合加负号
+		return diffCapture(board) * (board.getTurn() & 1) == 0 ? -1 : 1;
 	}
 
 	public void nextTurn() throws CloneNotSupportedException, IOException {
@@ -256,4 +260,52 @@ public class GameManager {
 	public Board getBoard() {
 		return curBoard;
 	}
+
+	public static void print(int[][] i) {
+		for (int[] p : i) {
+			for (int q : p)
+				System.out.print(q + " ");
+			System.out.println();
+		}
+	}
+
+//	 public static void main(String[] args) throws IOException,
+//	 CloneNotSupportedException {
+//	// GameManager.init();
+//	// SAMURAIS[5].setPos(5, 0);
+//	// int[][] b = new int[][] {
+//	// { 8, 8, 8, 8, 8, 5, 8, 8, 8, 8, 8, 8, 8, 8, 4 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 8 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+//	// { 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+//	// { 1, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8 }, };
+//	// Board k = new Board(b, 5);
+//	// Board c=k.makeMove(Move.MS_OS);
+//	// System.out.println(c.getBattleField().length);
+//	// GameManager.print(c.getBattleField());
+//	// System.out.println(GameManager.diffCapture(c));
+//	// System.out.println(GameManager.diffCapture(c));
+//	// System.out.println(GameManager.diffCapture(new Board(b, 0)));
+//	 GameManager gm = GameManager.init();
+//	 gm.nextTurn();
+//	 System.out.println(gm.curBoard.isFriendArea(4, 0));
+//	// GameManager.print(gm.prevBoard.getBattleField());
+//	// gm.nextTurn();
+//	// GameManager.print(gm.curBoard.getBattleField());
+//	// int[][] poses = new int[6][2];
+//	// for (int i = 0; i < 6; ++i)
+//	// poses[i] = GameManager.SAMURAIS[i].getPos();
+//	// for (int i = 0; i < 6; ++i)
+//	// System.out.println(i + ":" + poses[i][0] + "," + poses[i][1]);
+//	 }
 }

@@ -35,14 +35,13 @@ public class Board implements Cloneable {
 	final public Board makeMove(Move move) throws CloneNotSupportedException {
 		Board nextBoard = this.clone();
 
-		int activeSamuraiID = GameManager.ACTION_ORDER[turn % 12];// 取得进行活动的武士的ID
+		int activeSamuraiID = GameManager.ACTION_ORDER[nextBoard.turn % 12];// 取得进行活动的武士的ID
 		Samurai activeSamurai = nextBoard.samurais[activeSamuraiID];// 取得进行活动的武士
 		int[] samuraiPos = activeSamurai.getPos();// 取得武士位置
 		nextBoard.turn++;// 回合数增加
 
 		// 占据区域变化
 		int[][] occupyResult;
-
 		if ((occupyResult = move.getOccupyResult(activeSamurai.getWeapon())) != null)
 			for (int[] occupied : occupyResult)
 				nextBoard.set(occupied[0] + samuraiPos[0], occupied[1] + samuraiPos[1], activeSamuraiID);
@@ -93,6 +92,10 @@ public class Board implements Cloneable {
 		return this.samurais[GameManager.ACTION_ORDER[turn % 12]];
 	}
 
+	public int getTurn() {
+		return turn;
+	}
+
 	public boolean isFriendArea(int x, int y) {
 		return !(battleField[y][x] == 8) && !(battleField[y][x] < 3 ^ GameManager.SAMURAI_ID < 3);
 	}
@@ -102,10 +105,13 @@ public class Board implements Cloneable {
 	}
 
 	public void set(int[] pos, int val) {
-		this.set(pos[0], pos[1], val);
+		// 这两个方法虽然重载了，但作用是不同的
+		// 这个只用来设置家的位置
+		this.battleField[pos[1]][pos[0]] = val;
 	}
 
 	public void set(int x, int y, int val) {
+		// 这个只用来设置占据的区域，自动将家的位置排除出去
 		if (x < 0 || y < 0 || x >= GameManager.WIDTH || y >= GameManager.HEIGHT)
 			return;
 		for (int i = 0; i < 6; ++i)
@@ -121,12 +127,13 @@ public class Board implements Cloneable {
 	@Override
 	protected Board clone() throws CloneNotSupportedException {
 		int width = GameManager.WIDTH;
+		int height = GameManager.HEIGHT;
 
 		Board nextBoard = (Board) super.clone();
 
 		// 克隆局面信息
-		int[][] nextBattleField = new int[GameManager.HEIGHT][];
-		for (int i = 0; i < GameManager.HEIGHT; ++i) {
+		int[][] nextBattleField = new int[height][];
+		for (int i = 0; i < height; i++) {
 			nextBattleField[i] = new int[width];
 			System.arraycopy(this.battleField[i], 0, nextBattleField[i], 0, width);
 		}
@@ -143,5 +150,4 @@ public class Board implements Cloneable {
 
 		return nextBoard;
 	}
-
 }

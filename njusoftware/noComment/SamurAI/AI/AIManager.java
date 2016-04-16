@@ -18,13 +18,13 @@ public class AIManager {
 	private GameManager gameManger;
 	private static final List<String> ACTION_INDEX = new ArrayList<String>(
 			Arrays.asList(new String[] { "OS", "OE", "ON", "OW", "MS", "ME", "MN", "MW" }));
-	private final static int MAX_DEPTH = 2;
+	private final static int MAX_DEPTH = 4;
 	private final static int BOUND = Integer.MAX_VALUE;
 	private Board curBoard;
 	private Samurai samurai;
 	private Move bestMove;
 	private Move curMoveBranch;
-	// private static int prunCount = 0;
+//	 private static int count = 0;
 
 	public AIManager(GameManager gameManager) {
 		this.gameManger = gameManager;
@@ -36,11 +36,14 @@ public class AIManager {
 		curBoard = gameManger.getBoard();
 		samurai = GameManager.SAMURAIS[GameManager.SAMURAI_ID];
 		alphaBetaPruning(curBoard, MAX_DEPTH, -BOUND, BOUND);
+//		System.out.println("result:" + i);
+//		System.out.println(count);
 		return resolveMove();
 	}
 
 	/* 决策树搜索 Alpha-Beta剪枝 */
 	final private int alphaBetaPruning(Board board, int depth, int alpha, int beta) throws CloneNotSupportedException {
+//		count++;
 		if (depth == 0 || board.isEnd())
 			return gameManger.evaluate(board);
 		Board nextBoard;
@@ -54,9 +57,9 @@ public class AIManager {
 				bestMove = curMoveBranch;
 			nextBoard = board.makeMove(nextMove);
 			int value = -alphaBetaPruning(nextBoard, depth - 1, -beta, -alpha);// 迭代
-			System.out.println(value);
+//			System.out.println("depth:"+depth+"|activeSamurai:"+board.getCurrentSamurai().getWeapon().name()+"|curBranch:"+curMoveBranch.name()+"|move:"+nextMove.name()+"|value:"+value);
 			if (value >= beta)
-				return value;
+				return beta;
 			if (value > alpha) {
 				// 更新alpha,同时更新bestMove
 				alpha = value;

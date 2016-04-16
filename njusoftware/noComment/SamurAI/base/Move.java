@@ -14,27 +14,6 @@ package njusoftware.noComment.SamurAI.base;
 
 public enum Move {
 
-	// 先occupy后move
-	OS_MS(new int[] { 0, 1 }, Actions.OCCUPY_SOUTHWARD, false), // 南占据，南移动
-	OS_MW(new int[] { -1, 0 }, Actions.OCCUPY_SOUTHWARD, false), // 南占据，西移动
-	OS_MN(new int[] { 0, -1 }, Actions.OCCUPY_SOUTHWARD, false), // 南占据，北移动
-	OS_ME(new int[] { 1, 0 }, Actions.OCCUPY_SOUTHWARD, false), // 南占据，东移动
-
-	OE_MS(new int[] { 0, 1 }, Actions.OCCUPY_EASTWARD, false), // 东占据，南移动
-	OE_MW(new int[] { -1, 0 }, Actions.OCCUPY_EASTWARD, false), // 东占据，西移动
-	OE_MN(new int[] { 0, -1 }, Actions.OCCUPY_EASTWARD, false), // 东占据，北移动
-	OE_ME(new int[] { 1, 0 }, Actions.OCCUPY_EASTWARD, false), // 东占据，东移动
-
-	ON_MS(new int[] { 0, 1 }, Actions.OCCUPY_NORTHWARD, false), // 北占据，南移动
-	ON_MW(new int[] { -1, 0 }, Actions.OCCUPY_NORTHWARD, false), // 北占据，西移动
-	ON_MN(new int[] { 0, -1 }, Actions.OCCUPY_NORTHWARD, false), // 北占据，北移动
-	ON_ME(new int[] { 1, 0 }, Actions.OCCUPY_NORTHWARD, false), // 北占据，东移动
-
-	OW_MS(new int[] { 0, 1 }, Actions.OCCUPY_WESTWARD, false), // 西占据，南移动
-	OW_MW(new int[] { -1, 0 }, Actions.OCCUPY_WESTWARD, false), // 西占据，西移动
-	OW_MN(new int[] { 0, -1 }, Actions.OCCUPY_WESTWARD, false), // 西占据，北移动
-	OW_ME(new int[] { 1, 0 }, Actions.OCCUPY_WESTWARD, false), // 西占据，东移动
-
 	// 先move后occupy
 	MS_OS(new int[] { 0, 1 }, Actions.OCCUPY_SOUTHWARD, true), // 南移动，南占据
 	MS_OE(new int[] { 0, 1 }, Actions.OCCUPY_EASTWARD, true), // 南移动，东占据
@@ -55,6 +34,27 @@ public enum Move {
 	MW_OE(new int[] { -1, 0 }, Actions.OCCUPY_EASTWARD, true), // 西移动，东占据
 	MW_ON(new int[] { -1, 0 }, Actions.OCCUPY_NORTHWARD, true), // 西移动，北占据
 	MW_OW(new int[] { -1, 0 }, Actions.OCCUPY_WESTWARD, true), // 西移动，西占据
+
+	// 先occupy后move
+	OS_MS(new int[] { 0, 1 }, Actions.OCCUPY_SOUTHWARD, false), // 南占据，南移动
+	OS_MW(new int[] { -1, 0 }, Actions.OCCUPY_SOUTHWARD, false), // 南占据，西移动
+	OS_MN(new int[] { 0, -1 }, Actions.OCCUPY_SOUTHWARD, false), // 南占据，北移动
+	OS_ME(new int[] { 1, 0 }, Actions.OCCUPY_SOUTHWARD, false), // 南占据，东移动
+
+	OE_MS(new int[] { 0, 1 }, Actions.OCCUPY_EASTWARD, false), // 东占据，南移动
+	OE_MW(new int[] { -1, 0 }, Actions.OCCUPY_EASTWARD, false), // 东占据，西移动
+	OE_MN(new int[] { 0, -1 }, Actions.OCCUPY_EASTWARD, false), // 东占据，北移动
+	OE_ME(new int[] { 1, 0 }, Actions.OCCUPY_EASTWARD, false), // 东占据，东移动
+
+	ON_MS(new int[] { 0, 1 }, Actions.OCCUPY_NORTHWARD, false), // 北占据，南移动
+	ON_MW(new int[] { -1, 0 }, Actions.OCCUPY_NORTHWARD, false), // 北占据，西移动
+	ON_MN(new int[] { 0, -1 }, Actions.OCCUPY_NORTHWARD, false), // 北占据，北移动
+	ON_ME(new int[] { 1, 0 }, Actions.OCCUPY_NORTHWARD, false), // 北占据，东移动
+
+	OW_MS(new int[] { 0, 1 }, Actions.OCCUPY_WESTWARD, false), // 西占据，南移动
+	OW_MW(new int[] { -1, 0 }, Actions.OCCUPY_WESTWARD, false), // 西占据，西移动
+	OW_MN(new int[] { 0, -1 }, Actions.OCCUPY_WESTWARD, false), // 西占据，北移动
+	OW_ME(new int[] { 1, 0 }, Actions.OCCUPY_WESTWARD, false), // 西占据，东移动
 
 	// 仅occupy
 	OS(new int[] { 0, 0 }, Actions.OCCUPY_SOUTHWARD, false), // 南
@@ -86,7 +86,7 @@ public enum Move {
 	MW_MN(new int[] { -1, -1 }, null, false), // 西北
 	MW_MW(new int[] { -2, 0 }, null, false), // 西西
 
-	// 仅move一步
+	// move一步
 	MS(new int[] { 0, 1 }, null, false), // 南
 	ME(new int[] { 1, 0 }, null, false), // 东
 	MN(new int[] { 0, -1 }, null, false), // 北
