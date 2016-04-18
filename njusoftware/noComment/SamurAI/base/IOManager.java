@@ -52,7 +52,15 @@ public abstract class IOManager {
 				board[i][j] = Integer.parseInt(res[j + 1]);
 		}
 
-		return new Info().setTurn(turn).setRemainCurePeriod(remainCurePeriod).setSamuraiState(samuraiState)
+		GameManager.print(board);
+		
+		if (GameManager.SAMURAI_ID > 2)
+			for (int i = 0; i < GameManager.HEIGHT; ++i)
+				for (int j = 0; j < GameManager.WIDTH; ++j)
+					board[i][j] = board[i][j] > 6 ? board[i][j] : (5 - board[i][j]);
+
+
+		 return new Info().setTurn(turn).setRemainCurePeriod(remainCurePeriod).setSamuraiState(samuraiState)
 				.setBattleField(board);
 	}
 
@@ -94,6 +102,7 @@ public abstract class IOManager {
 			e.getStackTrace();
 			System.exit(-1);
 		}
+		
 		return line.split("\\s");
 	}
 

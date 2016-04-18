@@ -21,7 +21,7 @@ public class GameManager {
 	private int curTurn;// 当前回合数
 	private int remainCurePeriod;
 
-//	private static int count = 0;
+	// private static int count = 0;
 
 	public static int WIDTH;
 	public static int HEIGHT;
@@ -229,20 +229,28 @@ public class GameManager {
 
 		// 武士状态
 		int[][] samuraiState = turnInfo.getSamuraiState();
-		for (int i = 0; i < 6; ++i) {
-			if (-1 != samuraiState[i][0])
-				SAMURAIS[i].setPos(samuraiState[i][0], samuraiState[i][1]);
-			SAMURAIS[i].setVisible(0 == samuraiState[i][2]);
-			SAMURAIS[i].setActive(-1 != samuraiState[i][2]);
-		}
+		if (SAMURAI_ID < 3)
+			for (int i = 0; i < 6; ++i) {
+				if (-1 != samuraiState[i][0])
+					SAMURAIS[i].setPos(samuraiState[i][0], samuraiState[i][1]);
+				SAMURAIS[i].setVisible(0 == samuraiState[i][2]);
+				SAMURAIS[i].setActive(-1 != samuraiState[i][2]);
+			}
+		else
+			for (int i = 0; i < 6; ++i) {
+				if (-1 != samuraiState[i][0])
+					SAMURAIS[i < 3 ? i + 3 : i - 3].setPos(samuraiState[i][0], samuraiState[i][1]);
+				SAMURAIS[i < 3 ? i + 3 : i - 3].setVisible(0 == samuraiState[i][2]);
+				SAMURAIS[i < 3 ? i + 3 : i - 3].setActive(-1 != samuraiState[i][2]);
+			}
 		inferPosition();
 
 		// 受伤时直接输出0
 		if (remainCurePeriod != 0)
 			IOManager.output(new Info().setActions(new int[] { 0 }));
-
-		// 输出
-		IOManager.output(new Info().setActions(AI.decideActions()));
+		else
+			// 输出
+			IOManager.output(new Info().setActions(AI.decideActions()));
 	}
 
 	public static GameManager init() throws IOException {
@@ -252,8 +260,16 @@ public class GameManager {
 		CURE_PERIOD = gameInfo.getCurePeriod();
 		WIDTH = gameInfo.getWidth();
 		HEIGHT = gameInfo.getHeight();
-		HOME_POSES = gameInfo.getHomePos();
-		RANK_AND_SCORE = gameInfo.getRanksAndScores();
+
+		if (SAMURAI_ID < 3)
+			HOME_POSES = gameInfo.getHomePos();
+		else {
+			HOME_POSES = new int[6][];
+			int[][] tmp = gameInfo.getHomePos();
+			for (int i = 0; i < 6; i++)
+				HOME_POSES[i < 3 ? i + 3 : i - 3] = tmp[i];
+		}
+
 		return new GameManager();
 	}
 
@@ -264,48 +280,48 @@ public class GameManager {
 	public static void print(int[][] i) {
 		for (int[] p : i) {
 			for (int q : p)
-				System.out.print(q + " ");
-			System.out.println();
+				System.err.print(q + " ");
+			System.err.println();
 		}
 	}
 
-//	 public static void main(String[] args) throws IOException,
-//	 CloneNotSupportedException {
-//	// GameManager.init();
-//	// SAMURAIS[5].setPos(5, 0);
-//	// int[][] b = new int[][] {
-//	// { 8, 8, 8, 8, 8, 5, 8, 8, 8, 8, 8, 8, 8, 8, 4 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 8 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
-//	// { 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
-//	// { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
-//	// { 1, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8 }, };
-//	// Board k = new Board(b, 5);
-//	// Board c=k.makeMove(Move.MS_OS);
-//	// System.out.println(c.getBattleField().length);
-//	// GameManager.print(c.getBattleField());
-//	// System.out.println(GameManager.diffCapture(c));
-//	// System.out.println(GameManager.diffCapture(c));
-//	// System.out.println(GameManager.diffCapture(new Board(b, 0)));
-//	 GameManager gm = GameManager.init();
-//	 gm.nextTurn();
-//	 System.out.println(gm.curBoard.isFriendArea(4, 0));
-//	// GameManager.print(gm.prevBoard.getBattleField());
-//	// gm.nextTurn();
-//	// GameManager.print(gm.curBoard.getBattleField());
-//	// int[][] poses = new int[6][2];
-//	// for (int i = 0; i < 6; ++i)
-//	// poses[i] = GameManager.SAMURAIS[i].getPos();
-//	// for (int i = 0; i < 6; ++i)
-//	// System.out.println(i + ":" + poses[i][0] + "," + poses[i][1]);
-//	 }
+	// public static void main(String[] args) throws IOException,
+	// CloneNotSupportedException {
+	// // GameManager.init();
+	// // SAMURAIS[5].setPos(5, 0);
+	// // int[][] b = new int[][] {
+	// // { 8, 8, 8, 8, 8, 5, 8, 8, 8, 8, 8, 8, 8, 8, 4 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 8 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+	// // { 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+	// // { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+	// // { 1, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8 }, };
+	// // Board k = new Board(b, 5);
+	// // Board c=k.makeMove(Move.MS_OS);
+	// // System.out.println(c.getBattleField().length);
+	// // GameManager.print(c.getBattleField());
+	// // System.out.println(GameManager.diffCapture(c));
+	// // System.out.println(GameManager.diffCapture(c));
+	// // System.out.println(GameManager.diffCapture(new Board(b, 0)));
+	// GameManager gm = GameManager.init();
+	// gm.nextTurn();
+	// System.out.println(gm.curBoard.isFriendArea(4, 0));
+	// // GameManager.print(gm.prevBoard.getBattleField());
+	// // gm.nextTurn();
+	// // GameManager.print(gm.curBoard.getBattleField());
+	// // int[][] poses = new int[6][2];
+	// // for (int i = 0; i < 6; ++i)
+	// // poses[i] = GameManager.SAMURAIS[i].getPos();
+	// // for (int i = 0; i < 6; ++i)
+	// // System.out.println(i + ":" + poses[i][0] + "," + poses[i][1]);
+	// }
 }
