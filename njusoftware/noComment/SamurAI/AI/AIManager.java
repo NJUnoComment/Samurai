@@ -18,13 +18,13 @@ public class AIManager {
 	private GameManager gameManger;
 	private static final List<String> ACTION_INDEX = new ArrayList<String>(
 			Arrays.asList(new String[] { "OS", "OE", "ON", "OW", "MS", "ME", "MN", "MW" }));
-	private final static int MAX_DEPTH = 4;
+	private final static int MAX_DEPTH = 3;
 	private final static int BOUND = Integer.MAX_VALUE;
 	private Board curBoard;
 	private Samurai samurai;
 	private Move bestMove;
 	private Move curMoveBranch;
-//	 private static int count = 0;
+	// private static int count = 0;
 
 	public AIManager(GameManager gameManager) {
 		this.gameManger = gameManager;
@@ -36,16 +36,16 @@ public class AIManager {
 		curBoard = gameManger.getBoard();
 		samurai = GameManager.SAMURAIS[GameManager.SAMURAI_ID];
 		alphaBetaPruning(curBoard, MAX_DEPTH, -BOUND, BOUND);
-//		System.out.println("result:" + i);
-//		System.out.println(count);
+		// System.out.println("result:" + i);
+		// System.out.println(count);
 		return resolveMove();
 	}
 
 	/* ¾ö²ßÊ÷ËÑË÷ Alpha-Beta¼ôÖ¦ */
 	final private int alphaBetaPruning(Board board, int depth, int alpha, int beta) throws CloneNotSupportedException {
-//		count++;
+		// count++;
 		if (depth == 0 || board.isEnd())
-			return gameManger.evaluate(board);
+			return Evaluator.evaluate(board);
 		Board nextBoard;
 		while (board.hasMoreMove()) {
 			Move nextMove = board.nextMove();
@@ -57,7 +57,7 @@ public class AIManager {
 				bestMove = curMoveBranch;
 			nextBoard = board.makeMove(nextMove);
 			int value = -alphaBetaPruning(nextBoard, depth - 1, -beta, -alpha);// µü´ú
-//			System.out.println("depth:"+depth+"|activeSamurai:"+board.getCurrentSamurai().getWeapon().name()+"|curBranch:"+curMoveBranch.name()+"|move:"+nextMove.name()+"|value:"+value);
+			// System.out.println("depth:"+depth+"|activeSamurai:"+board.getCurrentSamurai().getWeapon().name()+"|curBranch:"+curMoveBranch.name()+"|move:"+nextMove.name()+"|value:"+value);
 			if (value >= beta)
 				return beta;
 			if (value > alpha) {

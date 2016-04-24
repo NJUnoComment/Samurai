@@ -27,6 +27,8 @@ public class Board implements Cloneable {
 
 	public Board(int[][] battleField, int turn) {
 		this.battleField = battleField;
+		for (int i = 0; i < 6; ++i)
+			battleField[GameManager.HOME_POSES[i][1]][GameManager.HOME_POSES[i][0]] = i;
 		this.turn = turn;
 		samurais = GameManager.SAMURAIS;
 	}
@@ -35,7 +37,7 @@ public class Board implements Cloneable {
 	final public Board makeMove(Move move) throws CloneNotSupportedException {
 		Board nextBoard = this.clone();
 
-		int activeSamuraiID = GameManager.ACTION_ORDER[nextBoard.turn % 12];// 取得进行活动的武士的ID
+		int activeSamuraiID = ConstVar.ACTION_ORDER[nextBoard.turn % 12];// 取得进行活动的武士的ID
 		Samurai activeSamurai = nextBoard.samurais[activeSamuraiID];// 取得进行活动的武士
 		int[] samuraiPos = activeSamurai.getPos();// 取得武士位置
 		nextBoard.turn++;// 回合数增加
@@ -89,7 +91,7 @@ public class Board implements Cloneable {
 	}
 
 	public Samurai getCurrentSamurai() {
-		return this.samurais[GameManager.ACTION_ORDER[turn % 12]];
+		return this.samurais[ConstVar.ACTION_ORDER[turn % 12]];
 	}
 
 	public int getTurn() {

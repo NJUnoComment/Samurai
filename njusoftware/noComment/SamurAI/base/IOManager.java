@@ -44,6 +44,9 @@ public abstract class IOManager {
 			samuraiState[i][2] = Integer.parseInt(res[2]);
 		}
 
+		if (GameManager.SAMURAI_ID > 2)
+			samuraiState = changeOrder(samuraiState);
+
 		// 局面
 		int[][] board = new int[GameManager.HEIGHT][GameManager.WIDTH];
 		for (int i = 0; i < GameManager.HEIGHT; ++i) {
@@ -52,15 +55,14 @@ public abstract class IOManager {
 				board[i][j] = Integer.parseInt(res[j + 1]);
 		}
 
-		GameManager.print(board);
-		
+		// GameManager.print(board);
+
 		if (GameManager.SAMURAI_ID > 2)
 			for (int i = 0; i < GameManager.HEIGHT; ++i)
 				for (int j = 0; j < GameManager.WIDTH; ++j)
 					board[i][j] = board[i][j] > 6 ? board[i][j] : (5 - board[i][j]);
 
-
-		 return new Info().setTurn(turn).setRemainCurePeriod(remainCurePeriod).setSamuraiState(samuraiState)
+		return new Info().setTurn(turn).setRemainCurePeriod(remainCurePeriod).setSamuraiState(samuraiState)
 				.setBattleField(board);
 	}
 
@@ -81,6 +83,9 @@ public abstract class IOManager {
 			homePos[i][1] = Integer.parseInt(res[1]);
 		}
 
+		if (samuraiID > 2)
+			homePos = changeOrder(homePos);
+
 		int[][] ranksAndScores = new int[6][2];
 		for (int i = 0; i < 6; ++i) {
 			res = read();
@@ -92,8 +97,13 @@ public abstract class IOManager {
 				.setCurePeriod(curePeriod).setHomePos(homePos).setRanksAndScores(ranksAndScores);
 	}
 
+	/* 在B方时要调换次序 */
+	private final static int[][] changeOrder(int[][] origin) {
+		return new int[][] { origin[3], origin[4], origin[5], origin[0], origin[1], origin[2] };
+	}
+
 	/* 读单行 */
-	private static String[] read() {
+	private final static String[] read() {
 		String line = "";
 		try {
 			for (line = bfr.readLine(); line.startsWith("#"); line = bfr.readLine())
@@ -102,7 +112,7 @@ public abstract class IOManager {
 			e.getStackTrace();
 			System.exit(-1);
 		}
-		
+
 		return line.split("\\s");
 	}
 
