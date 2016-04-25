@@ -10,6 +10,8 @@ package njusoftware.noComment.SamurAI.base;
 
 import java.util.Arrays;
 
+import njusoftware.noComment.SamurAI.AI.Evaluator;
+
 public class Board implements Cloneable {
 	private int[][] battleField;// 此字段包含战斗区域信息
 	private int turn;// 回合数
@@ -37,20 +39,48 @@ public class Board implements Cloneable {
 	final public Board makeMove(Move move) throws CloneNotSupportedException {
 		Board nextBoard = this.clone();
 
-		int activeSamuraiID = ConstVar.ACTION_ORDER[nextBoard.turn % 12];// 取得进行活动的武士的ID
-		Samurai activeSamurai = nextBoard.samurais[activeSamuraiID];// 取得进行活动的武士
-		int[] samuraiPos = activeSamurai.getPos();// 取得武士位置
-		nextBoard.turn++;// 回合数增加
+		Samurai[] samurais = nextBoard.samurais;
+		int currentSamuraiID = ConstVar.ACTION_ORDER[nextBoard.turn % 12];// 取得进行活动的武士的ID
+		Samurai currentSamurai = samurais[currentSamuraiID];// 取得进行活动的武士
+		int[] position = currentSamurai.getPos();// 取得武士位置
 
-		// 占据区域变化
+		nextBoard.refreshSamuraisState();
+
 		int[][] occupyResult;
-		if ((occupyResult = move.getOccupyResult(activeSamurai.getWeapon())) != null)
-			for (int[] occupied : occupyResult)
-				nextBoard.set(occupied[0] + samuraiPos[0], occupied[1] + samuraiPos[1], activeSamuraiID);
+		if ((occupyResult = move.getOccupyResult(currentSamurai.getWeapon())) != null) {
+			// 计算相对位置
+			int[][] deltaPosition = new int[3][2];
+			int tmp = currentSamuraiID > 2 ? 0 : 3;// 敌方
+			for (int i = tmp; i < tmp + 3; ++i)
+				if (samurais[i].isAlive() && samurais[i].isActive() && samurais[i].isVisible()) {
+					int[] enemyPosition = samurais[i].getPos();
+					deltaPosition[i][0] = enemyPosition[0] - position[0];
+					deltaPosition[i][1] = enemyPosition[1] - position[1];
+				} else
+					deltaPosition[i] = null;
 
+			for (int[] occupiedGrid : occupyResult) {
+				// 占据区域变化
+				nextBoard.set(occupiedGrid[0] + position[0], occupiedGrid[1] + position[1], currentSamuraiID);
+				// 砍死敌方
+				for (int i = 0; i < 3; ++i) {
+					if (deltaPosition[i] == null)
+						continue;
+					if (!samurais[i + tmp].isAlive())
+						continue;
+					Samurai injuredSamurai = samurais[i + tmp];
+					if (Evaluator.pointEqual(deltaPosition[i], occupiedGrid)) {
+						injuredSamurai.setAlive(false);
+						injuredSamurai.setPos(GameManager.HOME_POSES[i + tmp]);
+						injuredSamurai.setCuredTurn(GameManager.CURE_PERIOD + nextBoard.turn);
+					}
+				}
+			}
+		}
 		// 武士位置变化
-		activeSamurai.move(move.getMoveResult());
+		currentSamurai.move(move.getMoveResult());
 
+		nextBoard.turn++;// 回合数增加
 		return nextBoard;
 	}
 
@@ -72,6 +102,16 @@ public class Board implements Cloneable {
 		Move move = POSSIBLE_MOVES[moveIndex];
 		moveIndex++;
 		return move;
+	}
+
+	// 刷新武士是否受伤的状态
+	final public void refreshSamuraisState() {
+		for (Samurai samurai : samurais)
+			if (!samurai.isAlive() && samurai.isActive())
+				if (samurai.getCuredTurn() <= turn) {
+					samurai.setAlive(true);
+					samurai.setCuredTurn(0);
+				}
 	}
 
 	final public boolean isEnd() {

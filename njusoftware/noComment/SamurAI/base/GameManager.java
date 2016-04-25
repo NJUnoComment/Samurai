@@ -12,14 +12,13 @@ import java.io.IOException;
 import java.util.Random;
 
 import njusoftware.noComment.SamurAI.AI.AIManager;
-import njusoftware.noComment.SamurAI.AI.Evaluator;
 
 public class GameManager {
 	private static final Random r = new Random();
 	private AIManager AI;
 	private static Board prevBoard;// 上一回合的局面
-	private static Board curBoard;// 当前回合的局面
-	private int curTurn;// 当前回合数
+	public static Board curBoard;// 当前回合的局面
+	private static int curTurn;// 当前回合数
 	private int remainCurePeriod;
 
 	// private static int count = 0;
@@ -31,6 +30,9 @@ public class GameManager {
 	public static int[][] HOME_POSES;// 家的位置
 	public static int[][] RANK_AND_SCORE;
 	public static int SAMURAI_ID;// 控制的是哪一个武士，0-5表示
+	public static int FRIEND_INDEX;
+	public static int ENEMY_INDEX;
+
 	public static final Samurai[] SAMURAIS;// 武士
 	static {
 		SAMURAIS = new Samurai[6];
@@ -67,7 +69,7 @@ public class GameManager {
 	/* 推测隐身的武士位置 */
 	private void inferPosition() {
 		// 只需推测敌方不可见武士的位置
-		int tmp = 3 - (SAMURAI_ID > 2 ? 3 : 0);
+		int tmp = ENEMY_INDEX;
 		for (int i = tmp; i < tmp + 3; i++)
 			if (!SAMURAIS[i].isVisible())
 				inferPositionOf(i);
@@ -156,7 +158,7 @@ public class GameManager {
 	/* 预处理，用于未新增占领区的情况 */
 	final static private int[][] preprocess(int curX, int curY) {
 		int[][] result = new int[HEIGHT][WIDTH];
-		int tmp = SAMURAI_ID > 2 ? 3 : 0;// 敌方的敌方也就是我方
+		int tmp = FRIEND_INDEX;// 敌方的敌方也就是我方
 
 		// 计算我方每一个武士在指定敌方武士的那一个象限内，以ConstVar中分块移动范围数组的下标进行标识
 		int[] enemyPos1 = SAMURAIS[tmp].getPos();
@@ -224,6 +226,8 @@ public class GameManager {
 			SAMURAIS[i].setActive(-1 != samuraiState[i][2]);
 		}
 		inferPosition();
+
+		curBoard.refreshSamuraisState();
 	}
 
 	public final static GameManager init() throws IOException {
@@ -234,6 +238,8 @@ public class GameManager {
 		WIDTH = gameInfo.getWidth();
 		HEIGHT = gameInfo.getHeight();
 		HOME_POSES = gameInfo.getHomePos();
+		FRIEND_INDEX = SAMURAI_ID > 2 ? 3 : 0;
+		ENEMY_INDEX = 3 - SAMURAI_ID;
 
 		return new GameManager();
 	}

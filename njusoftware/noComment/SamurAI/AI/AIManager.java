@@ -36,6 +36,7 @@ public class AIManager {
 		curBoard = gameManger.getBoard();
 		samurai = GameManager.SAMURAIS[GameManager.SAMURAI_ID];
 		alphaBetaPruning(curBoard, MAX_DEPTH, -BOUND, BOUND);
+		GameManager.curBoard.makeMove(bestMove);
 		// System.out.println("result:" + i);
 		// System.out.println(count);
 		return resolveMove();

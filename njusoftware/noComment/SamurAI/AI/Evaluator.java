@@ -20,13 +20,33 @@ public class Evaluator {
 		// 所有偶数回合不换边，即偶数回合加负号
 		int captureDiff = diffCapture(board);
 		int attackRisk = evaluateRisk(board);
-		return (captureDiff + attackRisk) * ((board.getTurn() & 1) == 0 ? -1 : 1);
+		int aliveComparision = compareAlive(board);
+		int visibleComparision = compareVisible(board);
+		return (ConstVar.CAPTURE_POW * captureDiff + ConstVar.RISK_POW * attackRisk
+				+ ConstVar.ALIVE_POW * aliveComparision + ConstVar.VISIBLE_POW * visibleComparision)
+				* ((board.getTurn() & 1) == 0 ? -1 : 1);
+	}
+
+	final static private int compareAlive(Board board) {
+		Samurai[] samurais = board.samurais;
+		int result = 0;
+		for (int i = 0; i < 6; ++i)
+			result += samurais[i].isAlive() ? 0 : (i < 3 ? 1 : -1);
+		return result * (GameManager.FRIEND_INDEX > 2 ? -1 : 1);
+	}
+
+	final static private int compareVisible(Board board) {
+		Samurai[] samurais = board.samurais;
+		int result = 0;
+		for (int i = 0; i < 6; ++i)
+			result += samurais[i].isAlive() ? (samurais[i].isVisible() ? 0 : (i < 3 ? 1 : -1)) : 0;
+		return result * (GameManager.FRIEND_INDEX > 2 ? -1 : 1);
 	}
 
 	/* 计算占领面积差 */
 	final static private int diffCapture(Board board) {
 		int[][] battleField = board.getBattleField();
-		int tmp = GameManager.SAMURAI_ID < 3 ? 0 : 3;
+		int tmp = GameManager.FRIEND_INDEX;
 		int result = 0;
 		for (int[] row : battleField)
 			for (int grid : row)
@@ -34,6 +54,7 @@ public class Evaluator {
 		return result;
 	}
 
+	/* 判定双方可能被攻击的危险 */
 	final static private int evaluateRisk(Board board) {
 		int turn = board.getTurn();// 注意对于进行过一次move的board，回合数已经被加一
 		int tmpValue = (turn & 1) == 0 ? 4 : 5;// 每两次行动之间的间隔有两种不同的情况，判定方法会有所不同
@@ -45,47 +66,71 @@ public class Evaluator {
 		Samurai[] samurais = board.samurais;
 
 		int[] values = new int[6];// 存放风险评估值，按照自然顺序而不是行动顺序
+
 		// 如果不能理解两种不同的情况，请自行列表分析
 		// 根据标号将风险值放到values的相应位置
 		// 没什么规律所以不用循环了，全部写了出来
+		// 所有武士处于受伤状态时不会受到影响
+		// 这一段实在不够优雅，但是为了效率不得已为之
 		if (tmpValue == 4) {
 			// 第一个武士不受其他影响
 			values[ordinals[0]] = 0;
+
 			// 第二个与第一个敌对，受第一个影响
-			values[ordinals[1]] = atkRiskBy(samurais[ordinals[1]], samurais[ordinals[0]]);
+			values[ordinals[1]] = samurais[ordinals[1]].isAlive()
+					? atkRiskBy(samurais[ordinals[1]], samurais[ordinals[0]]) : 0;
+
 			// 第三个与第一个敌对，受第一个影响
-			values[ordinals[2]] = atkRiskBy(samurais[ordinals[2]], samurais[ordinals[0]]);
+			values[ordinals[2]] = samurais[ordinals[2]].isAlive()
+					? atkRiskBy(samurais[ordinals[2]], samurais[ordinals[0]]) : 0;
+
 			// 第三个与第一个友好，受二三影响
-			values[ordinals[3]] = atkRiskBy(samurais[ordinals[3]], samurais[ordinals[1]])
-					+ atkRiskBy(samurais[ordinals[3]], samurais[ordinals[2]]);
+			values[ordinals[3]] = samurais[ordinals[3]].isAlive()
+					? atkRiskBy(samurais[ordinals[3]], samurais[ordinals[1]])
+							+ atkRiskBy(samurais[ordinals[3]], samurais[ordinals[2]])
+					: 0;
+
 			// 不在判定序列中的武士，其中一个是刚刚进行过行动的武士
 			// 它与第一个友好，受二三影响
 			int lastOne = ConstVar.ACTION_ORDER[startIndex > 0 ? startIndex - 1 : 11];
-			values[lastOne] = atkRiskBy(samurais[lastOne], samurais[ordinals[1]])
-					+ atkRiskBy(samurais[lastOne], samurais[ordinals[2]]);
+			values[lastOne] = samurais[lastOne].isAlive() ? atkRiskBy(samurais[lastOne], samurais[ordinals[1]])
+					+ atkRiskBy(samurais[lastOne], samurais[ordinals[2]]) : 0;
+
 			// 另一个与刚刚进行过行动的武士相同武器但是敌对
 			// 它与第一个敌对，受一四影响
 			int lastTwo = lastOne > 2 ? lastOne - 3 : lastOne + 3;
-			values[lastTwo] = atkRiskBy(samurais[lastTwo], samurais[ordinals[0]])
-					+ atkRiskBy(samurais[lastTwo], samurais[ordinals[3]]);
+			values[lastTwo] = samurais[lastTwo].isAlive() ? atkRiskBy(samurais[lastTwo], samurais[ordinals[0]])
+					+ atkRiskBy(samurais[lastTwo], samurais[ordinals[3]]) : 0;
 		} else {
 			// 第一个武士不受其他影响，第二个与第一个友好，不受影响
 			values[ordinals[0]] = values[ordinals[1]] = 0;
+
 			// 第三个与第一个敌对，受一二影响
-			values[ordinals[2]] = atkRiskBy(samurais[ordinals[2]], samurais[ordinals[0]])
-					+ atkRiskBy(samurais[ordinals[2]], samurais[ordinals[1]]);
+			values[ordinals[2]] = samurais[ordinals[2]].isAlive()
+					? atkRiskBy(samurais[ordinals[2]], samurais[ordinals[0]])
+							+ atkRiskBy(samurais[ordinals[2]], samurais[ordinals[1]])
+					: 0;
+
 			// 第四个与第一个敌对，受一二影响
-			values[ordinals[3]] = atkRiskBy(samurais[ordinals[3]], samurais[ordinals[0]])
-					+ atkRiskBy(samurais[ordinals[3]], samurais[ordinals[1]]);
+			values[ordinals[3]] = samurais[ordinals[3]].isAlive()
+					? atkRiskBy(samurais[ordinals[3]], samurais[ordinals[0]])
+							+ atkRiskBy(samurais[ordinals[3]], samurais[ordinals[1]])
+					: 0;
+
 			// 第五个与第一个友好，受三四影响
-			values[ordinals[4]] = atkRiskBy(samurais[ordinals[4]], samurais[ordinals[2]])
-					+ atkRiskBy(samurais[ordinals[4]], samurais[ordinals[3]]);
+			values[ordinals[4]] = samurais[ordinals[4]].isAlive()
+					? atkRiskBy(samurais[ordinals[4]], samurais[ordinals[2]])
+							+ atkRiskBy(samurais[ordinals[4]], samurais[ordinals[3]])
+					: 0;
+
 			// 不在判定序列中的武士即刚刚进行过行动的武士
 			// 它与第一个敌对，受一二五影响
 			int lastOne = ConstVar.ACTION_ORDER[startIndex > 0 ? startIndex - 1 : 11];
-			values[lastOne] = atkRiskBy(samurais[ordinals[lastOne]], samurais[ordinals[0]])
-					+ atkRiskBy(samurais[ordinals[lastOne]], samurais[ordinals[1]])
-					+ atkRiskBy(samurais[ordinals[lastOne]], samurais[ordinals[4]]);
+			values[lastOne] = samurais[ordinals[lastOne]].isAlive()
+					? atkRiskBy(samurais[ordinals[lastOne]], samurais[ordinals[0]])
+							+ atkRiskBy(samurais[ordinals[lastOne]], samurais[ordinals[1]])
+							+ atkRiskBy(samurais[ordinals[lastOne]], samurais[ordinals[4]])
+					: 0;
 		}
 
 		// for (int i = 0; i < 6; i++)
@@ -138,7 +183,7 @@ public class Evaluator {
 	}
 
 	/* 判定数对相等 */
-	final static private boolean pointEqual(int[] p1, int[] p2) {
+	final static public boolean pointEqual(int[] p1, int[] p2) {
 		// 不必使用Arrays.equals，数组长度确定是2
 		return p1[0] == p2[0] && p1[1] == p2[1];
 	}
