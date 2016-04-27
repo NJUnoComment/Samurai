@@ -11,7 +11,7 @@ import njusoftware.noComment.SamurAI.base.Weapons;
  * */
 public class Evaluator {
 	/* 评估函数 */
-	final static public int evaluate(Board board) {
+	public static final int evaluate(Board board) {
 		// count++;
 		// System.out.println(count);
 		// 评估函数将永远从我方视角来评估
@@ -27,7 +27,7 @@ public class Evaluator {
 				* ((board.getTurn() & 1) == 0 ? -1 : 1);
 	}
 
-	final static private int compareAlive(Board board) {
+	private static final int compareAlive(Board board) {
 		Samurai[] samurais = board.samurais;
 		int result = 0;
 		for (int i = 0; i < 6; ++i)
@@ -35,7 +35,7 @@ public class Evaluator {
 		return result * (GameManager.FRIEND_INDEX > 2 ? -1 : 1);
 	}
 
-	final static private int compareVisible(Board board) {
+	private static final int compareVisible(Board board) {
 		Samurai[] samurais = board.samurais;
 		int result = 0;
 		for (int i = 0; i < 6; ++i)
@@ -44,7 +44,7 @@ public class Evaluator {
 	}
 
 	/* 计算占领面积差 */
-	final static private int diffCapture(Board board) {
+	private static final int diffCapture(Board board) {
 		int[][] battleField = board.getBattleField();
 		int tmp = GameManager.FRIEND_INDEX;
 		int result = 0;
@@ -55,7 +55,7 @@ public class Evaluator {
 	}
 
 	/* 判定双方可能被攻击的危险 */
-	final static private int evaluateRisk(Board board) {
+	private static final int evaluateRisk(Board board) {
 		int turn = board.getTurn();// 注意对于进行过一次move的board，回合数已经被加一
 		int tmpValue = (turn & 1) == 0 ? 4 : 5;// 每两次行动之间的间隔有两种不同的情况，判定方法会有所不同
 		int startIndex = turn % 12;// 开始进行判定的武士的标号
@@ -141,7 +141,7 @@ public class Evaluator {
 	}
 
 	/* 计算一个武士受另一个武士攻击的风险值 */
-	final static private int atkRiskBy(Samurai negative, Samurai positive) {
+	private static final int atkRiskBy(Samurai negative, Samurai positive) {
 		int[] pos1 = negative.getPos();
 		int[] pos2 = positive.getPos();
 		int[] delta = new int[] { pos2[0] - pos1[0], pos2[1] - pos1[1] };

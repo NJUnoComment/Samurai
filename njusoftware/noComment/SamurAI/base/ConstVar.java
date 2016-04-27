@@ -2,27 +2,28 @@ package njusoftware.noComment.SamurAI.base;
 
 public abstract class ConstVar {
 	public static final int[] ACTION_ORDER = new int[] { 0, 3, 4, 1, 2, 5, 3, 0, 1, 4, 5, 2 }; // 行动的顺序，数字是samurais的下标
-	// 用于推测位置的参数
 	public static final int CAPTURE_POW = 2, RISK_POW = 3, ALIVE_POW = 8, VISIBLE_POW = 1;
-	public final static int NEW_CAPTURE_POW = 2, // 新增占领区位置权重
+	// 用于推测位置的参数
+	public static final int NEW_CAPTURE_POW = 2, // 新增占领区位置权重
 			NEW_SUR_POW = 3, // 新增占领区周围权重
 			PREV_POS_POW = 2, // 先前位置权重
-			POS_SUR_POW = 5; // 先前位置周围的权重
+			POS_SUR_POW = 5, // 先前位置周围的权重
+			DEFAULT_MOV_RANGE_POW = 4;
 	// 用于遍历周围格子的数组
-	public final static int[][] SURROUNDINGS = new int[][] { { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 }, { 1, 1 },
+	public static final int[][] SURROUNDINGS = new int[][] { { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 }, { 1, 1 },
 			{ 1, 0 }, { 1, -1 }, { 0, -1 } };
 	// 移动范围
-	public final static int[][] MOVE_RANGE = { { 1, 0 }, { 2, 0 }, { 3, 0 }, { 0, 1 }, { 1, 1 }, { 2, 1 }, { 0, 2 },
+	public static final int[][] MOVE_RANGE = { { 1, 0 }, { 2, 0 }, { 3, 0 }, { 0, 1 }, { 1, 1 }, { 2, 1 }, { 0, 2 },
 			{ 1, 2 }, { 0, 3 }, { -1, 0 }, { -2, 0 }, { -3, 0 }, { -1, 1 }, { -2, 1 }, { -1, 2 }, { 0, -1 }, { 0, -2 },
 			{ 0, -3 }, { 1, -1 }, { 1, -2 }, { 2, -1 }, { -1, -1 }, { -2, -1 }, { -1, -2 }, }, // 只移动的范围
 			OCP_MOVE_RANGE = new int[][] { { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } };// 进行占据时的移动范围
 	// 分成四块的移动范围
-	public final static int[][][] SEPERATED_MOVE_RANGE = { // 注意坐标轴方向
+	public static final int[][][] SEPERATED_MOVE_RANGE = { // 注意坐标轴方向
 			{ { 1, 0 }, { 2, 0 }, { 3, 0 }, { 0, 1 }, { 1, 1 }, { 2, 1 }, { 0, 2 }, { 1, 2 }, { 0, 3 } }, // 第一象限,0
 			{ { -1, 0 }, { -2, 0 }, { -3, 0 }, { -1, 1 }, { -2, 1 }, { -1, 2 } }, // 第二象限,1
 			{ { 0, -1 }, { 0, -2 }, { 0, -3 }, { 1, -1 }, { 1, -2 }, { 2, -1 } }, // 第四象限,2
 			{ { -1, -1 }, { -2, -1 }, { -1, -2 } }, };// 第三象限,3
-	public final static int[][][] SPEAR_ATK_DISTRIBUTION = {
+	public static final int[][][] SPEAR_ATK_DISTRIBUTION = {
 			{ { -5, 0 }, { -4, -1 }, { -3, -1 }, { -2, -1 }, { -1, -2 }, { -1, -3 }, { -1, -4 }, { 0, -5 }, { 1, -4 },
 					{ 1, -3 }, { 1, -2 }, { 2, -1 }, { 3, -1 }, { 4, -1 }, { 5, 0 }, { 4, 1 }, { 3, 1 }, { 2, 1 },
 					{ 1, 2 }, { 1, 3 }, { 1, 4 }, { 0, 5 }, { -1, 4 }, { -1, 3 }, { -1, 2 }, { -2, 1 }, { -3, 1 },
@@ -31,14 +32,14 @@ public abstract class ConstVar {
 					{ -1, 0 }, { -1, -1 } }, // 危险度2
 			{ { 0, -3 }, { 3, 0 }, { 0, 3 }, { -3, 0 }, { 0, -2 }, { 2, 0 }, { 0, 2 }, { -2, 0 } } // 危险度3
 	};
-	public final static int[][][] SWORD_ATK_DISTRIBUTION = { {}, // 危险度1没有
+	public static final int[][][] SWORD_ATK_DISTRIBUTION = { {}, // 危险度1没有
 			{ { 0, -3 }, { 3, 0 }, { 0, 3 }, { -3, 0 } }, // 危险度2
 			{ { -2, -1 }, { -1, -2 }, { 1, -2 }, { 2, -1 }, { 2, 1 }, { 1, 2 }, { -1, 2 }, { -2, 1 } }, // 危险度3
 			{ { 0, -2 }, { 2, 0 }, { 0, 2 }, { -2, 0 } }, // 危险度4
 			{ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }, // 危险度5
 			{ { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } }// 危险度6
 	};
-	public final static int[][][] AXE_ATK_DISTRIBUTION = { {}, {}, // 危险度1,2没有
+	public static final int[][][] AXE_ATK_DISTRIBUTION = { {}, {}, // 危险度1,2没有
 			{ { 0, -2 }, { 2, 0 }, { 0, 2 }, { -2, 0 } }, // 危险度3
 			{ { -2, -1 }, { -1, -2 }, { 1, -2 }, { 2, -1 }, { 2, 1 }, { 1, 2 }, { -1, 2 }, { -2, 1 } }, // 危险度4
 			{}, {}, {}, {}, {}, // 危险度5,6,7,8,9没有

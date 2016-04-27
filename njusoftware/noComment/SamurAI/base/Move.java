@@ -90,7 +90,9 @@ public enum Move {
 	MS(new int[] { 0, 1 }, null, false), // 南
 	ME(new int[] { 1, 0 }, null, false), // 东
 	MN(new int[] { 0, -1 }, null, false), // 北
-	MW(new int[] { -1, 0 }, null, false); // 西
+	MW(new int[] { -1, 0 }, null, false), // 西
+
+	DO_NOTHING(new int[] { 0, 0 }, null, false);
 
 	private int[] moveResult;
 	private Actions occupyToward;

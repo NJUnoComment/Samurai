@@ -20,7 +20,7 @@ public enum Actions {
 	HIDE, // 隐藏
 	APPEAR;// 现身
 
-	public int[][] getMoveRange() {
+	public final int[][] getMoveRange() {
 		// 移动同理
 		int[][] moveRange = new int[][] { { 0, 1 } };
 		switch (this) {
@@ -37,7 +37,7 @@ public enum Actions {
 	}
 
 	/* 根据行动的方向旋转范围 */
-	public int[][] getAttackRange(final Weapons weapon) {
+	public final int[][] getAttackRange(final Weapons weapon) {
 		int[][] attackRange = weapon.getAttackRange();
 		switch (this) {
 		case OCCUPY_WESTWARD:
@@ -52,12 +52,8 @@ public enum Actions {
 		return attackRange;
 	}
 
-	public int getOrdinal() {
-		return ordinal() + 1;
-	}
-
 	/* 做关于y=x对称，即x，y互换 */
-	private static void turn(int[][] attackRange) {
+	private static final void turn(int[][] attackRange) {
 		for (int[] tmp : attackRange) {
 			// 位运算是效率最高的交换方法
 			tmp[0] = -tmp[0];

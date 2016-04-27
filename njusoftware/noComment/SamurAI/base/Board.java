@@ -36,7 +36,7 @@ public class Board implements Cloneable {
 	}
 
 	// 走棋
-	final public Board makeMove(Move move) throws CloneNotSupportedException {
+	public final Board makeMove(Move move) throws CloneNotSupportedException {
 		Board nextBoard = this.clone();
 
 		Samurai[] samurais = nextBoard.samurais;
@@ -85,9 +85,15 @@ public class Board implements Cloneable {
 	}
 
 	// 是否有更多合法操作
-	final public boolean hasMoreMove() {
-		if (!getCurrentSamurai().isActive())
+	public final boolean hasMoreMove() {
+		if (moveIndex == 61) {
+			moveIndex = 0;
 			return false;
+		}
+		if (!getCurrentSamurai().isAlive() || !getCurrentSamurai().isActive()) {
+			moveIndex = 60;
+			return true;
+		}
 		while (moveIndex < 60) {
 			if (isVaild(POSSIBLE_MOVES[moveIndex]))
 				return true;
@@ -98,14 +104,14 @@ public class Board implements Cloneable {
 	}
 
 	// 下一个合法操作
-	final public Move nextMove() {
+	public final Move nextMove() {
 		Move move = POSSIBLE_MOVES[moveIndex];
 		moveIndex++;
 		return move;
 	}
 
 	// 刷新武士是否受伤的状态
-	final public void refreshSamuraisState() {
+	public final void refreshSamuraisState() {
 		for (Samurai samurai : samurais)
 			if (!samurai.isAlive() && samurai.isActive())
 				if (samurai.getCuredTurn() <= turn) {
@@ -114,16 +120,15 @@ public class Board implements Cloneable {
 				}
 	}
 
-	final public boolean isEnd() {
+	public final boolean isEnd() {
 		return turn >= GameManager.TOTAL_TURNS;
 	}
 
 	// 判断某个操作是否是合法的
-	final private boolean isVaild(Move move) {
+	private final boolean isVaild(Move move) {
 		int[] curPos = this.getCurrentSamurai().getPos();
 		int[] offset = move.getMoveResult();
-		return curPos[0] + offset[0] < GameManager.WIDTH && curPos[0] + offset[0] >= 0
-				&& curPos[1] + offset[1] < GameManager.HEIGHT && curPos[1] + offset[1] >= 0;
+		return GameManager.inBound(curPos[0], offset[0], curPos[1], offset[1]);
 	}
 
 	public int[][] getBattleField() {
@@ -153,7 +158,7 @@ public class Board implements Cloneable {
 	}
 
 	public void set(int x, int y, int val) {
-		// 这个只用来设置占据的区域，自动将家的位置排除出去
+		// 这个只用来设置占据的区域，自动将家的位置排除
 		if (x < 0 || y < 0 || x >= GameManager.WIDTH || y >= GameManager.HEIGHT)
 			return;
 		for (int i = 0; i < 6; ++i)

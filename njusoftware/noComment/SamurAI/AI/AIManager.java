@@ -15,7 +15,6 @@ import java.util.List;
 import njusoftware.noComment.SamurAI.base.*;
 
 public class AIManager {
-	private GameManager gameManger;
 	private static final List<String> ACTION_INDEX = new ArrayList<String>(
 			Arrays.asList(new String[] { "OS", "OE", "ON", "OW", "MS", "ME", "MN", "MW" }));
 	private final static int MAX_DEPTH = 3;
@@ -26,24 +25,20 @@ public class AIManager {
 	private Move curMoveBranch;
 	// private static int count = 0;
 
-	public AIManager(GameManager gameManager) {
-		this.gameManger = gameManager;
-	}
-
-	final public int[] decideActions() throws CloneNotSupportedException {
+	public final int[] decideActions() throws CloneNotSupportedException {
 		bestMove = null;
 		curMoveBranch = null;
-		curBoard = gameManger.getBoard();
+		curBoard = GameManager.getCurrentBoard();
 		samurai = GameManager.SAMURAIS[GameManager.SAMURAI_ID];
 		alphaBetaPruning(curBoard, MAX_DEPTH, -BOUND, BOUND);
-		GameManager.curBoard.makeMove(bestMove);
+		GameManager.getCurrentBoard().makeMove(bestMove);
 		// System.out.println("result:" + i);
 		// System.out.println(count);
 		return resolveMove();
 	}
 
 	/* 决策树搜索 Alpha-Beta剪枝 */
-	final private int alphaBetaPruning(Board board, int depth, int alpha, int beta) throws CloneNotSupportedException {
+	private final int alphaBetaPruning(Board board, int depth, int alpha, int beta) throws CloneNotSupportedException {
 		// count++;
 		if (depth == 0 || board.isEnd())
 			return Evaluator.evaluate(board);
@@ -71,7 +66,7 @@ public class AIManager {
 	}
 
 	/* 解析Move */
-	final private int[] resolveMove() {
+	private final int[] resolveMove() {
 		boolean flag = true;
 		if (!samurai.isVisible())
 			flag = this.needsAppear();
@@ -79,7 +74,7 @@ public class AIManager {
 	}
 
 	/* 当回合开始时武士是隐身时，判断是否需要现身 */
-	final private boolean needsAppear() {
+	private final boolean needsAppear() {
 		if (bestMove.containsOccupy())
 			// 包含了占据操作则需要现身
 			return true;
@@ -140,7 +135,7 @@ public class AIManager {
 	}
 
 	/* 解析Move生成Action，考虑了是否隐身 */
-	final private int[] generateAction(boolean flag) {
+	private final int[] generateAction(boolean flag) {
 		int[] result = simpleResolve();
 		// 行动开始指已经经过了开局的现身操作
 		// 行动开始时处于现身状态，则直接解析
@@ -215,7 +210,7 @@ public class AIManager {
 	}
 
 	/* 根据Move的名字进行直接解析 */
-	final private int[] simpleResolve() {
+	private final int[] simpleResolve() {
 		String[] tmp = bestMove.name().split("_");
 		int[] result = new int[tmp.length];
 		for (int i = 0; i < tmp.length; ++i)
@@ -224,7 +219,7 @@ public class AIManager {
 	}
 
 	/* 最终调整，加上隐身和现身 */
-	final static private int[] modify(int[] unmodifiedActions, boolean needsAppear) {
+	private static final int[] modify(int[] unmodifiedActions, boolean needsAppear) {
 		int tmp = 0, tmp1 = needsAppear ? 1 : 0;
 		for (int i : unmodifiedActions)
 			tmp += 5 <= i && i <= 8 ? 2 : (1 <= i && i <= 4 ? 4 : 0);
