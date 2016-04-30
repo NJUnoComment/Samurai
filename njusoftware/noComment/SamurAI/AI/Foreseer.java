@@ -1,14 +1,11 @@
 package njusoftware.noComment.SamurAI.AI;
 
-import java.util.Random;
-
 import njusoftware.noComment.SamurAI.base.Board;
 import njusoftware.noComment.SamurAI.base.ConstVar;
 import njusoftware.noComment.SamurAI.base.GameManager;
 import njusoftware.noComment.SamurAI.base.Samurai;
 
 public class Foreseer {
-	private static final Random r = new Random();
 	private static final Samurai[] SAMURAIS = GameManager.SAMURAIS;
 
 	/* 通过推测去除视野限制 */
@@ -19,6 +16,7 @@ public class Foreseer {
 			for (int j = 0; j < GameManager.WIDTH; ++j)
 				if (current[i][j] == 9)
 					current[i][j] = previous[i][j];
+
 	}
 
 	/* 推测隐身的武士位置 */
@@ -33,6 +31,7 @@ public class Foreseer {
 	/* 特定武士的位置推测 */
 	private static final void inferPositionOf(int samuraiID, Board previousBoard, Board currentBoard) {
 		int[][] processedMap = processMap(samuraiID, previousBoard, currentBoard);
+
 		int max = 0, count = 0;
 		int tmpX = 0, tmpY = 0;
 		// 找出最大值并计数
@@ -48,12 +47,15 @@ public class Foreseer {
 				count += tmp == max ? 1 : 0;
 			}
 
-		// 在最大值位置里随机选择一个位置并设置为武士的位置
-		int index = r.nextInt(count);
-		for (int i = tmpY; i < GameManager.HEIGHT; ++i)
+		if (count == 1) {
+			SAMURAIS[samuraiID].setPos(tmpX, tmpY);
+			return;
+		}
+
+		for (int i = tmpY, index = count >> 1; i < GameManager.HEIGHT; ++i)
 			for (int j = tmpX; j < GameManager.WIDTH; ++j) {
-				count -= processedMap[i][j] == max ? 1 : 0;
-				if (count != index)
+				count -= (processedMap[i][j] == max) ? 1 : 0;
+				if (count > index)
 					continue;
 				SAMURAIS[samuraiID].setPos(j, i);
 				return;
@@ -69,7 +71,6 @@ public class Foreseer {
 
 		return postprocess(isCaptureChanged(markedMap) ? preprocess(markedMap, curX, curY) : preprocess(curX, curY),
 				curX, curY);
-
 	}
 
 	/* 标记新增的占领区 */
@@ -81,6 +82,7 @@ public class Foreseer {
 			for (int j = 0; j < GameManager.WIDTH; ++j)
 				// 将本回合该武士新增的地块标识出来
 				result[i][j] = curBattleField[i][j] == samuraiID && prevBattleField[i][j] != samuraiID;
+
 		return result;
 	}
 
@@ -91,6 +93,7 @@ public class Foreseer {
 			for (boolean i : p)
 				if (flag = i)
 					break;
+
 		return flag;
 	}
 
@@ -144,6 +147,7 @@ public class Foreseer {
 		for (int[] tmp : ConstVar.OCP_MOVE_RANGE)
 			if (GameManager.inBound(curX, tmp[0], curY, tmp[1]))
 				result[curY + tmp[1]][curX + tmp[0]] += ConstVar.POS_SUR_POW;
+
 		return result;
 	}
 }

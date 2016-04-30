@@ -47,7 +47,7 @@ public class Samurai implements Cloneable {
 	}
 
 	public void setPos(int[] pos) {
-		this.pos = pos;
+		System.arraycopy(pos, 0, this.pos, 0, 2);
 	}
 
 	public void setPos(int x, int y) {

@@ -2,7 +2,7 @@ package njusoftware.noComment.SamurAI.base;
 
 public abstract class ConstVar {
 	public static final int[] ACTION_ORDER = new int[] { 0, 3, 4, 1, 2, 5, 3, 0, 1, 4, 5, 2 }; // 行动的顺序，数字是samurais的下标
-	public static final int CAPTURE_POW = 2, RISK_POW = 3, ALIVE_POW = 8, VISIBLE_POW = 1;
+	public static final int CAPTURE_POW = 2, RISK_POW = 3, ALIVE_POW = 8;
 	// 用于推测位置的参数
 	public static final int NEW_CAPTURE_POW = 2, // 新增占领区位置权重
 			NEW_SUR_POW = 3, // 新增占领区周围权重

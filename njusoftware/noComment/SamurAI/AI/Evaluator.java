@@ -21,10 +21,9 @@ public class Evaluator {
 		int captureDiff = diffCapture(board);
 		int attackRisk = evaluateRisk(board);
 		int aliveComparision = compareAlive(board);
-		int visibleComparision = compareVisible(board);
+
 		return (ConstVar.CAPTURE_POW * captureDiff + ConstVar.RISK_POW * attackRisk
-				+ ConstVar.ALIVE_POW * aliveComparision + ConstVar.VISIBLE_POW * visibleComparision)
-				* ((board.getTurn() & 1) == 0 ? -1 : 1);
+				+ ConstVar.ALIVE_POW * aliveComparision);
 	}
 
 	private static final int compareAlive(Board board) {
@@ -32,14 +31,6 @@ public class Evaluator {
 		int result = 0;
 		for (int i = 0; i < 6; ++i)
 			result += samurais[i].isAlive() ? 0 : (i < 3 ? 1 : -1);
-		return result * (GameManager.FRIEND_INDEX > 2 ? -1 : 1);
-	}
-
-	private static final int compareVisible(Board board) {
-		Samurai[] samurais = board.samurais;
-		int result = 0;
-		for (int i = 0; i < 6; ++i)
-			result += samurais[i].isAlive() ? (samurais[i].isVisible() ? 0 : (i < 3 ? 1 : -1)) : 0;
 		return result * (GameManager.FRIEND_INDEX > 2 ? -1 : 1);
 	}
 
@@ -51,6 +42,7 @@ public class Evaluator {
 		for (int[] row : battleField)
 			for (int grid : row)
 				result += grid == 8 ? 0 : (!(grid > 2 ^ tmp == 3) ? 1 : -1);
+
 		return result;
 	}
 
@@ -126,11 +118,9 @@ public class Evaluator {
 			// 不在判定序列中的武士即刚刚进行过行动的武士
 			// 它与第一个敌对，受一二五影响
 			int lastOne = ConstVar.ACTION_ORDER[startIndex > 0 ? startIndex - 1 : 11];
-			values[lastOne] = samurais[ordinals[lastOne]].isAlive()
-					? atkRiskBy(samurais[ordinals[lastOne]], samurais[ordinals[0]])
-							+ atkRiskBy(samurais[ordinals[lastOne]], samurais[ordinals[1]])
-							+ atkRiskBy(samurais[ordinals[lastOne]], samurais[ordinals[4]])
-					: 0;
+			values[lastOne] = samurais[lastOne].isAlive() ? atkRiskBy(samurais[lastOne], samurais[ordinals[0]])
+					+ atkRiskBy(samurais[lastOne], samurais[ordinals[1]])
+					+ atkRiskBy(samurais[lastOne], samurais[ordinals[4]]) : 0;
 		}
 
 		// for (int i = 0; i < 6; i++)
@@ -187,67 +177,4 @@ public class Evaluator {
 		// 不必使用Arrays.equals，数组长度确定是2
 		return p1[0] == p2[0] && p1[1] == p2[1];
 	}
-
-	// 低效，已废弃
-	// private static int[][] figureAtkRangeDistribution(Board board) {
-	// Samurai[] samurais = board.samurais;
-	//
-	// int turn = board.getTurn();// 注意已经进行过操作的盘面的回合数指向下一回合
-	// int tmp = (turn & 1) == 0 ? 4 : 5;// 两种不同的范围
-	// int tmp1 = turn % 12;// 被考虑的武士的起始序号
-	// int[] ordinals = new int[tmp];// 取出所有被考虑的武士们的序号
-	// for (int i = 0; i < tmp; i++)
-	// ordinals[i] = ConstVar.ACTION_ORDER[(tmp1 + i) % 12];
-	//
-	// int height = GameManager.HEIGHT, width = GameManager.WIDTH;
-	// int[][] result = new int[height][width];
-	//
-	// for (int i = 0; i < tmp; ++i) {
-	// // 对于每一个被评估的武士
-	// int ordinal = ordinals[i];// 对应的序号
-	// Samurai s = samurais[ordinal];
-	//
-	// int[] pos = s.getPos();
-	// int x = pos[0], y = pos[1];// 位置
-	//
-	// int[][][] atkRange = null;// 带有权重的攻击范围
-	// switch (s.getWeapon()) {
-	// case SPEAR:
-	// atkRange = ConstVar.SPEAR_ATK_DISTRIBUTION;
-	// break;
-	// case SWORD:
-	// atkRange = ConstVar.SWORD_ATK_DISTRIBUTION;
-	// break;
-	// case AXE:
-	// atkRange = ConstVar.AXE_ATK_DISTRIBUTION;
-	// }
-	// int length = atkRange.length;
-	//
-	// // 此处将一个int当做一个容器，四位分成一组
-	// // 按顺序存放
-	// // 较先攻击的位于较高位，较后攻击的位于较低位
-	// for (int k = 0; k < length; ++k) {
-	// int pow = (k + 1) << ((tmp - i - 1) << 2);// 用数组下标+1作为权重值，并根据行动的先后向左移位
-	// for (int[] p : atkRange[k])
-	// if (GameManager.isInBound(x, p[0], y, p[1]))
-	// result[y + p[1]][x + p[0]] += pow;// 为每个格子累加上权重值
-	// }
-	// }
-	//
-	// return result;
-	// }
-
-	//
-	// private static void output(int[][] p) {
-	// for (int[] j : p) {
-	// for (int k : j) {
-	// int[] tmp = new int[5];
-	// for (int i = 0; i < 5; i++)
-	// tmp[i] = (k >> ((4 - i) << 2)) & 0x0000000F;
-	// System.out.print(tmp[0] + "|" + tmp[1] + "|" + tmp[2] + "|" + tmp[3] +
-	// "|" + tmp[4] + "\t");
-	// }
-	// System.out.println();
-	// }
-	// }
 }

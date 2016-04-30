@@ -44,7 +44,7 @@ public abstract class IOManager {
 			samuraiState[i][2] = Integer.parseInt(res[2]);
 		}
 
-		if (GameManager.SAMURAI_ID > 2)
+		if (GameManager.FRIEND_INDEX == 3)
 			samuraiState = changeOrder(samuraiState);
 
 		// ¾ÖÃæ
@@ -55,12 +55,12 @@ public abstract class IOManager {
 				board[i][j] = Integer.parseInt(res[j + 1]);
 		}
 
-		// GameManager.print(board);
 
-		if (GameManager.SAMURAI_ID > 2)
+		if (GameManager.FRIEND_INDEX == 3)
 			for (int i = 0; i < GameManager.HEIGHT; ++i)
 				for (int j = 0; j < GameManager.WIDTH; ++j)
-					board[i][j] = board[i][j] > 6 ? board[i][j] : (5 - board[i][j]);
+					if (board[i][j] < 6)
+						board[i][j] += board[i][j] < 3 ? 3 : -3;
 
 		return new Info().setTurn(turn).setRemainCurePeriod(remainCurePeriod).setSamuraiState(samuraiState)
 				.setBattleField(board);
@@ -112,7 +112,7 @@ public abstract class IOManager {
 			e.getStackTrace();
 			System.exit(-1);
 		}
-
+		// System.err.println(line);
 		return line.split("\\s");
 	}
 

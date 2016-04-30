@@ -17,49 +17,81 @@ import njusoftware.noComment.SamurAI.base.*;
 public class AIManager {
 	private static final List<String> ACTION_INDEX = new ArrayList<String>(
 			Arrays.asList(new String[] { "OS", "OE", "ON", "OW", "MS", "ME", "MN", "MW" }));
-	private final static int MAX_DEPTH = 3;
 	private final static int BOUND = Integer.MAX_VALUE;
-	private Board curBoard;
+	private Board currentBoard;
 	private Samurai samurai;
 	private Move bestMove;
-	private Move curMoveBranch;
-	// private static int count = 0;
+	private Move[] currentBranches;
+	private Move[] possibleBestMoves;
 
+	// private static int count = 0;
 	public final int[] decideActions() throws CloneNotSupportedException {
 		bestMove = null;
-		curMoveBranch = null;
-		curBoard = GameManager.getCurrentBoard();
+		currentBoard = GameManager.getCurrentBoard();
 		samurai = GameManager.SAMURAIS[GameManager.SAMURAI_ID];
-		alphaBetaPruning(curBoard, MAX_DEPTH, -BOUND, BOUND);
-		GameManager.getCurrentBoard().makeMove(bestMove);
+
+		int[] movingEnemiesID = calcMovingEnemiesID(currentBoard.getTurn());
+		possibleBestMoves = new Move[movingEnemiesID.length];
+		currentBranches = new Move[movingEnemiesID.length];
+		plan(currentBoard, movingEnemiesID);
+		GameManager.setCurrentBoard(currentBoard.makeMove(bestMove));
 		// System.out.println("result:" + i);
 		// System.out.println(count);
 		return resolveMove();
 	}
 
-	/* 决策树搜索 Alpha-Beta剪枝 */
-	private final int alphaBetaPruning(Board board, int depth, int alpha, int beta) throws CloneNotSupportedException {
-		// count++;
+	private static final int[] calcMovingEnemiesID(int turn) {
+		int id = GameManager.SAMURAI_ID, enemyIndex = GameManager.ENEMY_INDEX, tmp = id + enemyIndex - 3;
+		if (id != 1 && id != 4) {
+			return turn % 12 == (id << 1) ? new int[] { enemyIndex, enemyIndex + 1, enemyIndex + 2 }
+					: new int[] { enemyIndex + (tmp == 0 ? 1 : 0), enemyIndex + (tmp == 2 ? 1 : 2) };
+		} else {
+			if (id == 1)
+				return turn == 8 ? new int[] { 3, 4, 5 } : new int[] { 3, 5 };
+			else
+				return turn == 2 ? new int[] { 0, 1, 2 } : new int[] { 0, 2 };
+		}
+	}
+
+	private final void plan(Board board, int[] movingEnemiesID) throws CloneNotSupportedException {
+		int length = movingEnemiesID.length;
+		for (int i = 0; i < length; ++i)
+			alphaBetaPruning(board, movingEnemiesID[i], i, -BOUND, BOUND, 2);
+
+		bestMove = possibleBestMoves[0];
+		for (int i = 1, result = Evaluator.evaluate(currentBoard.makeMove(possibleBestMoves[0])); i < length; ++i) {
+			int value = Evaluator.evaluate(currentBoard.makeMove(possibleBestMoves[i]));
+			if (value > result) {
+				result = value;
+				bestMove = possibleBestMoves[i];
+			}
+		}
+	}
+
+	private final int alphaBetaPruning(Board board, int movingEnemyID, int ordinal, int alpha, int beta, int depth)
+			throws CloneNotSupportedException {
 		if (depth == 0 || board.isEnd())
 			return Evaluator.evaluate(board);
 		Board nextBoard;
+		int value;
 		while (board.hasMoreMove()) {
 			Move nextMove = board.nextMove();
-			if (depth == MAX_DEPTH)
-				// curMoveBranch跟踪当前遍历的走法分支
-				curMoveBranch = nextMove;
-			if (bestMove == null)
-				// bestMove的初始值是最左侧的走法分支
-				bestMove = curMoveBranch;
-			nextBoard = board.makeMove(nextMove);
-			int value = -alphaBetaPruning(nextBoard, depth - 1, -beta, -alpha);// 迭代
-			// System.out.println("depth:"+depth+"|activeSamurai:"+board.getCurrentSamurai().getWeapon().name()+"|curBranch:"+curMoveBranch.name()+"|move:"+nextMove.name()+"|value:"+value);
+			if (depth == 2) {
+				currentBranches[ordinal] = nextMove;
+				if (possibleBestMoves[ordinal] == null)
+					possibleBestMoves[ordinal] = nextMove;
+			}
+			if (depth == 2)
+				nextBoard = board.makeMove(nextMove);
+			else
+				nextBoard = board.makeMove(nextMove, movingEnemyID);
+			value = -alphaBetaPruning(nextBoard, movingEnemyID, ordinal, -beta, -alpha, depth - 1);
 			if (value >= beta)
 				return beta;
 			if (value > alpha) {
 				// 更新alpha,同时更新bestMove
 				alpha = value;
-				bestMove = curMoveBranch;
+				possibleBestMoves[ordinal] = currentBranches[ordinal];
 			}
 		}
 		return alpha;
@@ -85,7 +117,7 @@ public class AIManager {
 		int deltaX = offset[0], deltaY = offset[1];
 		int signX = Integer.signum(deltaX), signY = Integer.signum(deltaY);
 
-		if (!curBoard.isFriendArea(curX + deltaX, curY + deltaY))
+		if (!currentBoard.isFriendArea(curX + deltaX, curY + deltaY))
 			// 移动的终点非友方区域则需要现身
 			return true;
 
@@ -95,11 +127,11 @@ public class AIManager {
 		case 2:
 			// 直线移动只需判断直线上是否有非友方
 			if (deltaX == 0 || deltaY == 0)
-				if (curBoard.isFriendArea(curX + deltaX >> 1, curY + deltaY >> 1))
+				if (currentBoard.isFriendArea(curX + deltaX >> 1, curY + deltaY >> 1))
 					break;
 
 			// 拐弯移动判断拐弯点是否都是非友方
-			if (curBoard.isFriendArea(curX, curY + deltaY) || curBoard.isFriendArea(curX + deltaX, curY))
+			if (currentBoard.isFriendArea(curX, curY + deltaY) || currentBoard.isFriendArea(curX + deltaX, curY))
 				break;
 
 			return true;
@@ -108,10 +140,10 @@ public class AIManager {
 		case 3:
 			// 直线移动只需判断直线上是否有非友方
 			if (deltaX == 0)
-				if (curBoard.isFriendArea(curX, curY + signY) && curBoard.isFriendArea(curX, curY + signY << 1))
+				if (currentBoard.isFriendArea(curX, curY + signY) && currentBoard.isFriendArea(curX, curY + signY << 1))
 					break;
 			if (deltaY == 0)
-				if (curBoard.isFriendArea(curX + signX, curY) && curBoard.isFriendArea(curX + signX << 1, curY))
+				if (currentBoard.isFriendArea(curX + signX, curY) && currentBoard.isFriendArea(curX + signX << 1, curY))
 					break;
 
 			// 拐弯移动判断
@@ -125,9 +157,9 @@ public class AIManager {
 			int[] p4 = new int[] { halfX == 0 ? 0 : deltaX, halfY == 0 ? 0 : deltaY };// p4在p1的对角
 			// 以上保证按照顺序，p1 p3 终点在同一边，起点 p2 p4在同一边，p2 p3分别是两条边的中点
 			// 闹不明白的话自己画张图
-			if ((curBoard.isFriendArea(p1) && curBoard.isFriendArea(p3))
-					|| (curBoard.isFriendArea(p2) && curBoard.isFriendArea(p4))
-					|| (curBoard.isFriendArea(p2) && curBoard.isFriendArea(p3)))
+			if ((currentBoard.isFriendArea(p1) && currentBoard.isFriendArea(p3))
+					|| (currentBoard.isFriendArea(p2) && currentBoard.isFriendArea(p4))
+					|| (currentBoard.isFriendArea(p2) && currentBoard.isFriendArea(p3)))
 				break;
 			return true;
 		}
@@ -157,7 +189,7 @@ public class AIManager {
 
 			// 拐弯移动判断拐弯点是否都是非友方
 			// 由于是Move里以水平方向优先，所以先水平后垂直时，直接解析
-			if (curBoard.isFriendArea(curPos[0] + deltaX, curPos[1]))
+			if (currentBoard.isFriendArea(curPos[0] + deltaX, curPos[1]))
 				return result;
 
 			// 先垂直后水平时，调换顺序
@@ -180,10 +212,10 @@ public class AIManager {
 			// 竖着的矩形，对应result S -> p1 -> p3 -> E
 			if (halfX == 0) {
 				// 路线S -> p1 -> p3 -> E
-				if (curBoard.isFriendArea(p1) && curBoard.isFriendArea(p3))
+				if (currentBoard.isFriendArea(p1) && currentBoard.isFriendArea(p3))
 					return result;
 				// 路线S -> p2 -> p4 -> E
-				else if (curBoard.isFriendArea(p2) && curBoard.isFriendArea(p4))
+				else if (currentBoard.isFriendArea(p2) && currentBoard.isFriendArea(p4))
 					return new int[] { result[0], result[2], result[0] };
 				// 路线S -> p2 -> p3 -> E
 				else
@@ -193,10 +225,10 @@ public class AIManager {
 			// 躺着的矩形，对应result S -> p2 -> p4 -> E
 			if (halfY == 0) {// 这句可以不用写，但是那样就不好看了
 				// 路线S -> p2 -> p4 -> E
-				if (curBoard.isFriendArea(p2) && curBoard.isFriendArea(p4))
+				if (currentBoard.isFriendArea(p2) && currentBoard.isFriendArea(p4))
 					return result;
 				// 路线S -> p1 -> p3 -> E
-				else if (curBoard.isFriendArea(p1) && curBoard.isFriendArea(p3))
+				else if (currentBoard.isFriendArea(p1) && currentBoard.isFriendArea(p3))
 					return new int[] { result[2], result[0], result[0] };
 				// 路线S -> p2 -> p3 -> E
 				else
