@@ -42,16 +42,14 @@ public class Board implements Cloneable {
 
 	public final Board makeMove(Move move, int samuraiID) throws CloneNotSupportedException {
 		Board nextBoard = this.clone();
-		nextBoard.refreshSamuraisState();
+		nextBoard.updateSamuraisState();
 
 		Samurai movingSamurai = nextBoard.samurais[samuraiID];
 
 		int[][] occupyResult;
 		if ((occupyResult = move.getOccupyResult(movingSamurai.getWeapon())) != null) {
-			// 根据最终AI的算法，可能会进行move的只有自己和敌方
-			// 进行攻击的只有自己，所以此处进行了简化
-			if (samuraiID == GameManager.SAMURAI_ID)
-				attack(nextBoard, occupyResult);
+			// 根据最终AI的算法，会进行move的只有自己和敌方
+			Evaluator.attachRisk(nextBoard, samuraiID, occupyResult);
 
 			int[] position = movingSamurai.getPos();
 			for (int[] occupiedGrid : occupyResult)
@@ -66,9 +64,10 @@ public class Board implements Cloneable {
 		return nextBoard;
 	}
 
-	public final void attack(Board nextBoard, int[][] occupyResult) {
+	private final void attack(Board nextBoard, int[][] occupyResult) {
 		int[] position = GameManager.SAMURAIS[GameManager.SAMURAI_ID].getPos();
 		int enemyID = GameManager.ENEMY_INDEX;// 敌方
+		Samurai[] samurais = nextBoard.samurais;
 
 		int[][] deltaPosition = new int[3][2];// 计算相对位置
 		for (int i = enemyID, k = enemyID + 3; i < k; ++i)
@@ -79,7 +78,6 @@ public class Board implements Cloneable {
 			} else
 				deltaPosition[i - enemyID] = null;
 
-		Samurai[] samurais = nextBoard.samurais;
 		for (int[] occupiedGrid : occupyResult)
 			for (int i = 0; i < 3; i++) {
 				if (deltaPosition[i] == null)
@@ -90,14 +88,14 @@ public class Board implements Cloneable {
 				Samurai injuredSamurai = samurais[tmp];
 				if (Evaluator.pointEqual(deltaPosition[i], occupiedGrid)) {
 					injuredSamurai.setAlive(false);
-					injuredSamurai.setPos(GameManager.HOME_POSES[tmp]);
+					injuredSamurai.setPosition(GameManager.HOME_POSES[tmp]);
 					injuredSamurai.setCuredTurn(GameManager.CURE_PERIOD + nextBoard.turn);
 				}
 			}
 	}
 
 	// 刷新武士是否受伤的状态
-	public final void refreshSamuraisState() {
+	public final void updateSamuraisState() {
 		for (Samurai samurai : samurais)
 			if (!samurai.isAlive() && samurai.isActive())
 				if (samurai.getCuredTurn() <= turn) {
@@ -107,17 +105,21 @@ public class Board implements Cloneable {
 	}
 
 	// 是否有更多合法操作
-	public final boolean hasMoreMove() {
-		if (moveIndex == 61) {
+	public final boolean hasMoreMove(int samuraiID) {
+		if (samuraiID == -1)
+			return hasMoreMove(ConstVar.ACTION_ORDER[turn % 12]);
+
+		if (moveIndex >= 61) {
 			moveIndex = 0;
 			return false;
 		}
-		if (!getCurrentSamurai().isAlive() || !getCurrentSamurai().isActive()) {
+
+		if (!samurais[samuraiID].isAlive() || !samurais[samuraiID].isActive()) {
 			moveIndex = 60;
 			return true;
 		}
 		while (moveIndex < 60) {
-			if (isVaild(POSSIBLE_MOVES[moveIndex]))
+			if (isValid(POSSIBLE_MOVES[moveIndex], samuraiID))
 				return true;
 			moveIndex++;
 		}
@@ -137,8 +139,8 @@ public class Board implements Cloneable {
 	}
 
 	// 判断某个操作是否是合法的
-	private final boolean isVaild(Move move) {
-		int[] curPos = this.getCurrentSamurai().getPos();
+	private final boolean isValid(Move move, int samuraiID) {
+		int[] curPos = samurais[samuraiID].getPos();
 		int[] offset = move.getMoveResult();
 		return GameManager.inBound(curPos[0], offset[0], curPos[1], offset[1]);
 	}
@@ -147,19 +149,15 @@ public class Board implements Cloneable {
 		return this.battleField;
 	}
 
-	public Samurai getCurrentSamurai() {
-		return this.samurais[ConstVar.ACTION_ORDER[turn % 12]];
-	}
-
 	public int getTurn() {
 		return turn;
 	}
 
-	public boolean isFriendArea(int x, int y) {
-		return !(battleField[y][x] == 8) && !(battleField[y][x] < 3 ^ GameManager.SAMURAI_ID < 3);
+	public final boolean isFriendArea(int x, int y) {
+		return GameManager.isFriendID(battleField[y][x]);
 	}
 
-	public boolean isFriendArea(int[] pos) {
+	public final boolean isFriendArea(int[] pos) {
 		return isFriendArea(pos[0], pos[1]);
 	}
 
@@ -171,16 +169,11 @@ public class Board implements Cloneable {
 
 	public void set(int x, int y, int val) {
 		// 这个只用来设置占据的区域，自动将家的位置排除
-		if (x < 0 || y < 0 || x >= GameManager.WIDTH || y >= GameManager.HEIGHT)
+		if (!GameManager.inBound(x, 0, y, 0))
 			return;
-		for (int i = 0; i < 6; ++i)
-			if (x == GameManager.HOME_POSES[i][0] && y == GameManager.HOME_POSES[i][1])
-				return;
+		if (Evaluator.containsPoint(new int[] { x, y }, GameManager.HOME_POSES))
+			return;
 		this.battleField[y][x] = val;
-	}
-
-	public void setBattleField(final int[][] theBattleField) {
-		this.battleField = theBattleField;
 	}
 
 	@Override

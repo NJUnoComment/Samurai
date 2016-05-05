@@ -16,7 +16,6 @@ public class Foreseer {
 			for (int j = 0; j < GameManager.WIDTH; ++j)
 				if (current[i][j] == 9)
 					current[i][j] = previous[i][j];
-
 	}
 
 	/* 推测隐身的武士位置 */
@@ -31,7 +30,8 @@ public class Foreseer {
 	/* 特定武士的位置推测 */
 	private static final void inferPositionOf(int samuraiID, Board previousBoard, Board currentBoard) {
 		int[][] processedMap = processMap(samuraiID, previousBoard, currentBoard);
-
+		// GameManager.print(processedMap);
+		// System.err.println();
 		int max = 0, count = 0;
 		int tmpX = 0, tmpY = 0;
 		// 找出最大值并计数
@@ -48,7 +48,7 @@ public class Foreseer {
 			}
 
 		if (count == 1) {
-			SAMURAIS[samuraiID].setPos(tmpX, tmpY);
+			SAMURAIS[samuraiID].setPosition(tmpX, tmpY);
 			return;
 		}
 
@@ -57,7 +57,7 @@ public class Foreseer {
 				count -= (processedMap[i][j] == max) ? 1 : 0;
 				if (count > index)
 					continue;
-				SAMURAIS[samuraiID].setPos(j, i);
+				SAMURAIS[samuraiID].setPosition(j, i);
 				return;
 			}
 	}
@@ -68,9 +68,8 @@ public class Foreseer {
 		int curX = curPos[0], curY = curPos[1];// 直接取出横纵坐标以提高效率
 
 		boolean[][] markedMap = markNewCapture(samuraiID, previousBoard, currentBoard);
-
-		return postprocess(isCaptureChanged(markedMap) ? preprocess(markedMap, curX, curY) : preprocess(curX, curY),
-				curX, curY);
+		boolean flag = isCaptureChanged(markedMap);
+		return postprocess(flag ? preprocess(markedMap, curX, curY) : preprocess(curX, curY), curX, curY, flag);
 	}
 
 	/* 标记新增的占领区 */
@@ -81,20 +80,19 @@ public class Foreseer {
 		for (int i = 0; i < GameManager.HEIGHT; ++i)
 			for (int j = 0; j < GameManager.WIDTH; ++j)
 				// 将本回合该武士新增的地块标识出来
-				result[i][j] = curBattleField[i][j] == samuraiID && prevBattleField[i][j] != samuraiID;
+				result[i][j] = (curBattleField[i][j] == samuraiID) && (prevBattleField[i][j] != samuraiID);
 
 		return result;
 	}
 
 	/* 检查占据范围是否发生了改变 */
 	private static final boolean isCaptureChanged(boolean[][] markedMap) {
-		boolean flag = false;
 		for (boolean[] p : markedMap)
 			for (boolean i : p)
-				if (flag = i)
-					break;
+				if (i)
+					return true;
 
-		return flag;
+		return false;
 	}
 
 	/* 预处理，用于新增了占领区的情况 */
@@ -119,32 +117,38 @@ public class Foreseer {
 	private static final int[][] preprocess(int curX, int curY) {
 		int[][] result = new int[GameManager.HEIGHT][GameManager.WIDTH];
 		int tmp = GameManager.FRIEND_INDEX;// 敌方的敌方也就是我方
-
 		// 计算我方每一个武士在指定敌方武士的那一个象限内，以ConstVar中分块移动范围数组的下标进行标识
 		int[] enemyPos1 = SAMURAIS[tmp].getPos();
 		int[] enemyPos2 = SAMURAIS[tmp + 1].getPos();
 		int[] enemyPos3 = SAMURAIS[tmp + 2].getPos();
-		int flag1 = (enemyPos1[0] < curX ? 1 : 0) & (enemyPos1[1] < curY ? 2 : 0);
-		int flag2 = (enemyPos2[0] < curX ? 1 : 0) & (enemyPos2[1] < curY ? 2 : 0);
-		int flag3 = (enemyPos3[0] < curX ? 1 : 0) & (enemyPos3[1] < curY ? 2 : 0);
+		int flag1 = enemyPos1[0] < curX ? (enemyPos1[1] <= curY ? 2 : 1)
+				: (enemyPos1[1] < curY ? 3 : (enemyPos1[0] == curX ? 1 : 0));
+		int flag2 = enemyPos2[0] < curX ? (enemyPos2[1] <= curY ? 2 : 1)
+				: (enemyPos2[1] < curY ? 3 : (enemyPos2[0] == curX ? 1 : 0));
+		int flag3 = enemyPos3[0] < curX ? (enemyPos3[1] <= curY ? 2 : 1)
+				: (enemyPos3[1] < curY ? 3 : (enemyPos3[0] == curX ? 1 : 0));
 
-		for (int i = 0; i < 4; ++i)
+		for (int i = 0; i < 4; i++)
 			for (int[] p : ConstVar.SEPERATED_MOVE_RANGE[i])
 				// 如果有敌人在某一象限中，则把这个象限中的权重值都减去1
-				if (GameManager.inBound(curX, p[0], curY, p[1]))
+				if (GameManager.inBound(curX, p[0], curY, p[1])) {
 					result[curY + p[1]][curX + p[0]] = ConstVar.DEFAULT_MOV_RANGE_POW
-							- ((flag1 == i ? 1 : 0) + (flag2 == i ? 1 : 0) + (flag3 == 0 ? 1 : 0));
+							- ((flag1 == i ? 1 : 0) + (flag2 == i ? 1 : 0) + (flag3 == i ? 1 : 0));
+				}
 
 		return result;
 	}
 
 	/* 后处理，加上位置带来的权重 */
-	private static final int[][] postprocess(int[][] result, int curX, int curY) {
+	private static final int[][] postprocess(int[][] result, int curX, int curY, boolean flag) {
 		// 先前所在位置加一个权重
 		result[curY][curX] += ConstVar.PREV_POS_POW;
 
+		if (!flag)
+			return result;
+
 		// 先前所在位置的周围加一个权重
-		for (int[] tmp : ConstVar.OCP_MOVE_RANGE)
+		for (int[] tmp : ConstVar.manhattanDistance(1))
 			if (GameManager.inBound(curX, tmp[0], curY, tmp[1]))
 				result[curY + tmp[1]][curX + tmp[0]] += ConstVar.POS_SUR_POW;
 

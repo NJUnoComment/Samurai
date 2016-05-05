@@ -24,7 +24,6 @@ public class AIManager {
 	private Move[] currentBranches;
 	private Move[] possibleBestMoves;
 
-	// private static int count = 0;
 	public final int[] decideActions() throws CloneNotSupportedException {
 		bestMove = null;
 		currentBoard = GameManager.getCurrentBoard();
@@ -34,7 +33,6 @@ public class AIManager {
 		possibleBestMoves = new Move[movingEnemiesID.length];
 		currentBranches = new Move[movingEnemiesID.length];
 		plan(currentBoard, movingEnemiesID);
-		GameManager.setCurrentBoard(currentBoard.makeMove(bestMove));
 		// System.out.println("result:" + i);
 		// System.out.println(count);
 		return resolveMove();
@@ -58,40 +56,60 @@ public class AIManager {
 		for (int i = 0; i < length; ++i)
 			alphaBetaPruning(board, movingEnemiesID[i], i, -BOUND, BOUND, 2);
 
-		bestMove = possibleBestMoves[0];
-		for (int i = 1, result = Evaluator.evaluate(currentBoard.makeMove(possibleBestMoves[0])); i < length; ++i) {
-			int value = Evaluator.evaluate(currentBoard.makeMove(possibleBestMoves[i]));
-			if (value > result) {
-				result = value;
-				bestMove = possibleBestMoves[i];
+		int value = 0, maxMini = -BOUND, ordinal = -1;
+		Board nextBoard;
+		for (int i = 0, bound = possibleBestMoves.length; i < bound; i++) {
+			nextBoard = currentBoard.makeMove(possibleBestMoves[i]);
+			int temp = BOUND;
+			for (int id : movingEnemiesID)
+				while (nextBoard.hasMoreMove(id)) {
+					value = Evaluator.evaluate(nextBoard.makeMove(nextBoard.nextMove(), id));
+					if (value < temp)
+						temp = value;
+				}
+			System.err.println("\t" + possibleBestMoves[i] + ":" + temp);
+			if (temp > maxMini) {
+				maxMini = temp;
+				ordinal = i;
 			}
 		}
+
+		bestMove = possibleBestMoves[ordinal];
 	}
 
 	private final int alphaBetaPruning(Board board, int movingEnemyID, int ordinal, int alpha, int beta, int depth)
 			throws CloneNotSupportedException {
 		if (depth == 0 || board.isEnd())
 			return Evaluator.evaluate(board);
+
 		Board nextBoard;
 		int value;
-		while (board.hasMoreMove()) {
+
+		while (board.hasMoreMove(depth == 2 ? -1 : movingEnemyID)) {
 			Move nextMove = board.nextMove();
 			if (depth == 2) {
 				currentBranches[ordinal] = nextMove;
 				if (possibleBestMoves[ordinal] == null)
 					possibleBestMoves[ordinal] = nextMove;
 			}
+
 			if (depth == 2)
 				nextBoard = board.makeMove(nextMove);
 			else
 				nextBoard = board.makeMove(nextMove, movingEnemyID);
+
 			value = -alphaBetaPruning(nextBoard, movingEnemyID, ordinal, -beta, -alpha, depth - 1);
+			// System.out.println("\t" + ordinal + "\t" + depth + "\t" +
+			// currentBranches[ordinal] + "\t" + nextMove + "\t"
+			// + alpha + "\t" + beta + "\t" + value + "\t" +
+			// possibleBestMoves[ordinal]);
 			if (value >= beta)
 				return beta;
 			if (value > alpha) {
 				// 更新alpha,同时更新bestMove
 				alpha = value;
-				possibleBestMoves[ordinal] = currentBranches[ordinal];
+				if (depth == 2)
+					possibleBestMoves[ordinal] = currentBranches[ordinal];
 			}
 		}
 		return alpha;
@@ -117,7 +135,8 @@ public class AIManager {
 		int deltaX = offset[0], deltaY = offset[1];
 		int signX = Integer.signum(deltaX), signY = Integer.signum(deltaY);
 
-		if (!currentBoard.isFriendArea(curX + deltaX, curY + deltaY))
+		if (!currentBoard.isFriendArea(curX + deltaX, curY + deltaY) || Evaluator
+				.pointEqual(new int[] { curX + deltaX, curY + deltaY }, GameManager.HOME_POSES[GameManager.SAMURAI_ID]))
 			// 移动的终点非友方区域则需要现身
 			return true;
 

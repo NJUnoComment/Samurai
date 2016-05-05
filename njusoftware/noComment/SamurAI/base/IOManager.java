@@ -30,10 +30,14 @@ public abstract class IOManager {
 		// 回合数
 		res = read();
 		int turn = Integer.parseInt(res[0]);
-
+//		System.err.println("# Turn information");
+//		System.err.println("# <turn>");
+//		System.err.println(turn);
 		// 回复时间
 		res = read();
 		int remainCurePeriod = Integer.parseInt(res[0]);
+//		System.err.println("# <cure preiod>");
+//		System.err.println(remainCurePeriod);
 
 		// 武士状态
 		int[][] samuraiState = new int[6][3];
@@ -43,6 +47,9 @@ public abstract class IOManager {
 			samuraiState[i][1] = Integer.parseInt(res[1]);
 			samuraiState[i][2] = Integer.parseInt(res[2]);
 		}
+//		System.err.println("# Samurai states");
+//		for (int[] tmp : samuraiState)
+//			System.err.println(tmp[0] + " " + tmp[1] + " " + tmp[2]);
 
 		if (GameManager.FRIEND_INDEX == 3)
 			samuraiState = changeOrder(samuraiState);
@@ -55,6 +62,9 @@ public abstract class IOManager {
 				board[i][j] = Integer.parseInt(res[j + 1]);
 		}
 
+//		System.err.println("# Battle field states");
+//		GameManager.print(board);
+//		System.err.println(" ");
 
 		if (GameManager.FRIEND_INDEX == 3)
 			for (int i = 0; i < GameManager.HEIGHT; ++i)

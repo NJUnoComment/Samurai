@@ -25,11 +25,11 @@ public enum Actions {
 		int[][] moveRange = new int[][] { { 0, 1 } };
 		switch (this) {
 		case MOVE_WESTWARD:
-			turn(moveRange);
+			rotate(moveRange);
 		case MOVE_NORTHWARD:
-			turn(moveRange);
+			rotate(moveRange);
 		case MOVE_EASTWARD:
-			turn(moveRange);
+			rotate(moveRange);
 		default:
 			break;
 		}
@@ -41,11 +41,11 @@ public enum Actions {
 		int[][] attackRange = weapon.getAttackRange();
 		switch (this) {
 		case OCCUPY_WESTWARD:
-			turn(attackRange);
+			rotate(attackRange);
 		case OCCUPY_NORTHWARD:
-			turn(attackRange);
+			rotate(attackRange);
 		case OCCUPY_EASTWARD:
-			turn(attackRange);
+			rotate(attackRange);
 		default:
 			break;
 		}
@@ -53,9 +53,8 @@ public enum Actions {
 	}
 
 	/* 做关于y=x对称，即x，y互换 */
-	private static final void turn(int[][] attackRange) {
+	private static final void rotate(int[][] attackRange) {
 		for (int[] tmp : attackRange) {
-			// 位运算是效率最高的交换方法
 			tmp[0] = -tmp[0];
 			tmp[0] = tmp[1] ^ tmp[0];
 			tmp[1] = tmp[1] ^ tmp[0];

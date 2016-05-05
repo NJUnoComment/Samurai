@@ -16,6 +16,7 @@ public class Samurai implements Cloneable {
 	private boolean isVisible = true;
 	private boolean isAlive = true;
 	private boolean isActive = true;
+	private int atkedRisk = 0;
 
 	public Samurai(Weapons weapon) {
 		this.weapon = weapon;
@@ -34,6 +35,10 @@ public class Samurai implements Cloneable {
 		return weapon;
 	}
 
+	public int getAtkedRisk() {
+		return atkedRisk;
+	}
+
 	public boolean isVisible() {
 		return isVisible;
 	}
@@ -46,11 +51,11 @@ public class Samurai implements Cloneable {
 		return isAlive;
 	}
 
-	public void setPos(int[] pos) {
-		System.arraycopy(pos, 0, this.pos, 0, 2);
+	public void setPosition(int[] pos) {
+		setPosition(pos[0], pos[1]);
 	}
 
-	public void setPos(int x, int y) {
+	public void setPosition(int x, int y) {
 		pos[0] = x;
 		pos[1] = y;
 	}
@@ -71,6 +76,10 @@ public class Samurai implements Cloneable {
 		this.isAlive = isAlive;
 	}
 
+	public void setAtkedRisk(int atkedRisk) {
+		this.atkedRisk = atkedRisk;
+	}
+
 	public void move(int[] moveTo) {
 		pos[0] += moveTo[0];
 		pos[1] += moveTo[1];
@@ -87,6 +96,7 @@ public class Samurai implements Cloneable {
 		nextSamurai.isVisible = this.isVisible;
 		nextSamurai.isAlive = this.isAlive;
 		nextSamurai.isActive = this.isActive;
+		nextSamurai.atkedRisk = this.atkedRisk;
 		return nextSamurai;
 	}
 }
